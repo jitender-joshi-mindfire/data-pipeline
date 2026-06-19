@@ -1,0 +1,857 @@
+{
+    "errors": [
+        {
+            "id": "err-1",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "field 'id' is required but missing or null",
+            "record": {
+                "active": "false",
+                "amount": "530.74",
+                "category": "furniture",
+                "date": "2025-03-28T16:50:33+05:30",
+                "email": "carleton.mcdermott@quigley.name",
+                "name": "Ansel Lopez",
+                "quantity": "62",
+                "rating": "4.9"
+            },
+            "timestamp": "2026-06-19T11:40:07.749293Z"
+        },
+        {
+            "id": "err-2",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "field 'id' is required but missing or null",
+            "record": {
+                "active": "true",
+                "amount": "312.77",
+                "category": "sports",
+                "date": "2025-10-12T16:50:33+05:30",
+                "email": "smanning@jones.info",
+                "name": "Althea Ashley",
+                "quantity": "73",
+                "rating": "0.9"
+            },
+            "timestamp": "2026-06-19T11:40:07.749297Z"
+        },
+        {
+            "id": "err-3",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "field 'id' is required but missing or null",
+            "record": {
+                "active": "false",
+                "amount": "410.58",
+                "category": "electronics",
+                "date": "2026-04-14T16:50:33+05:30",
+                "email": "chesterromero88@simpson.name",
+                "name": "Donna Allen",
+                "quantity": "25",
+                "rating": "1.0"
+            },
+            "timestamp": "2026-06-19T11:40:07.749316Z"
+        },
+        {
+            "id": "err-4",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "validation failed: 1 violation(s)",
+            "record": {
+                "active": "false",
+                "amount": "530.74",
+                "category": "furniture",
+                "date": "2025-03-28T16:50:33+05:30",
+                "email": "carleton.mcdermott@quigley.name",
+                "name": "Ansel Lopez",
+                "quantity": "62",
+                "rating": "4.9"
+            },
+            "timestamp": "2026-06-19T11:40:07.749326Z"
+        },
+        {
+            "id": "err-5",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "validation failed: 1 violation(s)",
+            "record": {
+                "active": "false",
+                "amount": "410.58",
+                "category": "electronics",
+                "date": "2026-04-14T16:50:33+05:30",
+                "email": "chesterromero88@simpson.name",
+                "name": "Donna Allen",
+                "quantity": "25",
+                "rating": "1.0"
+            },
+            "timestamp": "2026-06-19T11:40:07.749326Z"
+        },
+        {
+            "id": "err-6",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "field 'id' is required but missing or null",
+            "record": {
+                "active": "true",
+                "amount": "725.51",
+                "category": "furniture",
+                "date": "2024-06-21T16:50:33+05:30",
+                "email": "connorspencer@stevens.org",
+                "name": "Eileen Rath",
+                "quantity": "98",
+                "rating": "2.7"
+            },
+            "timestamp": "2026-06-19T11:40:07.74933Z"
+        },
+        {
+            "id": "err-7",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "field 'id' is required but missing or null",
+            "record": {
+                "active": "true",
+                "amount": "703.41",
+                "category": "electronics",
+                "date": "2025-07-23T16:50:33+05:30",
+                "email": "azamora@sims.info",
+                "name": "Arlo Patterson",
+                "quantity": "10",
+                "rating": "1.2"
+            },
+            "timestamp": "2026-06-19T11:40:07.749333Z"
+        },
+        {
+            "id": "err-8",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "validation failed: 1 violation(s)",
+            "record": {
+                "active": "true",
+                "amount": "725.51",
+                "category": "furniture",
+                "date": "2024-06-21T16:50:33+05:30",
+                "email": "connorspencer@stevens.org",
+                "name": "Eileen Rath",
+                "quantity": "98",
+                "rating": "2.7"
+            },
+            "timestamp": "2026-06-19T11:40:07.749335Z"
+        },
+        {
+            "id": "err-9",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "field 'id' is required but missing or null",
+            "record": {
+                "active": "true",
+                "amount": "766.25",
+                "category": "garden",
+                "date": "2025-05-26T16:50:33+05:30",
+                "email": "carlie.webster@todd.io",
+                "name": "",
+                "quantity": "53",
+                "rating": "3.4"
+            },
+            "timestamp": "2026-06-19T11:40:07.749335Z"
+        },
+        {
+            "id": "err-10",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "validation failed: 1 violation(s)",
+            "record": {
+                "active": "true",
+                "amount": "703.41",
+                "category": "electronics",
+                "date": "2025-07-23T16:50:33+05:30",
+                "email": "azamora@sims.info",
+                "name": "Arlo Patterson",
+                "quantity": "10",
+                "rating": "1.2"
+            },
+            "timestamp": "2026-06-19T11:40:07.749336Z"
+        },
+        {
+            "id": "err-14",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "field 'id' is required but missing or null",
+            "record": {
+                "active": "false",
+                "amount": "628.57",
+                "category": "books",
+                "date": "2025-06-02T16:50:33+05:30",
+                "email": "francisortega@newman.name",
+                "name": "Sheldon Barton",
+                "quantity": "22",
+                "rating": "2.7"
+            },
+            "timestamp": "2026-06-19T11:40:07.749358Z"
+        },
+        {
+            "id": "err-15",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "validation failed: 1 violation(s)",
+            "record": {
+                "active": "false",
+                "amount": "628.57",
+                "category": "books",
+                "date": "2025-06-02T16:50:33+05:30",
+                "email": "francisortega@newman.name",
+                "name": "Sheldon Barton",
+                "quantity": "22",
+                "rating": "2.7"
+            },
+            "timestamp": "2026-06-19T11:40:07.74936Z"
+        },
+        {
+            "id": "err-16",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "field 'id' is required but missing or null",
+            "record": {
+                "active": "true",
+                "amount": "423.59",
+                "category": "garden",
+                "date": "2026-04-22T16:50:33+05:30",
+                "email": "jesseperkins@fox.net",
+                "name": "Alda Hayes",
+                "quantity": "97",
+                "rating": "5.0"
+            },
+            "timestamp": "2026-06-19T11:40:07.749365Z"
+        },
+        {
+            "id": "err-17",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "validation failed: 1 violation(s)",
+            "record": {
+                "active": "true",
+                "amount": "423.59",
+                "category": "garden",
+                "date": "2026-04-22T16:50:33+05:30",
+                "email": "jesseperkins@fox.net",
+                "name": "Alda Hayes",
+                "quantity": "97",
+                "rating": "5.0"
+            },
+            "timestamp": "2026-06-19T11:40:07.749367Z"
+        },
+        {
+            "id": "err-18",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "field 'id' is required but missing or null",
+            "record": {
+                "active": "true",
+                "amount": "27.30",
+                "category": "health",
+                "date": "2025-11-03T16:50:33+05:30",
+                "email": "arichards@reilly.name",
+                "name": "Talia Johnson",
+                "quantity": "85",
+                "rating": "3.2"
+            },
+            "timestamp": "2026-06-19T11:40:07.749373Z"
+        },
+        {
+            "id": "err-19",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "validation failed: 1 violation(s)",
+            "record": {
+                "active": "true",
+                "amount": "27.30",
+                "category": "health",
+                "date": "2025-11-03T16:50:33+05:30",
+                "email": "arichards@reilly.name",
+                "name": "Talia Johnson",
+                "quantity": "85",
+                "rating": "3.2"
+            },
+            "timestamp": "2026-06-19T11:40:07.749375Z"
+        },
+        {
+            "id": "err-20",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "field 'id' is required but missing or null",
+            "record": {
+                "active": "true",
+                "amount": "330.81",
+                "category": "clothing",
+                "date": "2024-07-30T16:50:33+05:30",
+                "email": "marlene.bailey@keller.com",
+                "name": "Hal Gibson",
+                "quantity": "56",
+                "rating": "2.8"
+            },
+            "timestamp": "2026-06-19T11:40:07.74938Z"
+        },
+        {
+            "id": "err-21",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "validation failed: 1 violation(s)",
+            "record": {
+                "active": "true",
+                "amount": "330.81",
+                "category": "clothing",
+                "date": "2024-07-30T16:50:33+05:30",
+                "email": "marlene.bailey@keller.com",
+                "name": "Hal Gibson",
+                "quantity": "56",
+                "rating": "2.8"
+            },
+            "timestamp": "2026-06-19T11:40:07.749382Z"
+        },
+        {
+            "id": "err-22",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "field 'id' is required but missing or null",
+            "record": {
+                "active": "true",
+                "amount": "828.00",
+                "category": "health",
+                "date": "2026-01-10T16:50:33+05:30",
+                "email": "kenya_rodriguez87@bird.info",
+                "name": "Chaim Larkin",
+                "quantity": "17",
+                "rating": "0.3"
+            },
+            "timestamp": "2026-06-19T11:40:07.749388Z"
+        },
+        {
+            "id": "err-11",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "validation failed: 1 violation(s)",
+            "record": {
+                "active": "true",
+                "amount": "766.25",
+                "category": "garden",
+                "date": "2025-05-26T16:50:33+05:30",
+                "email": "carlie.webster@todd.io",
+                "name": "",
+                "quantity": "53",
+                "rating": "3.4"
+            },
+            "timestamp": "2026-06-19T11:40:07.749338Z"
+        },
+        {
+            "id": "err-23",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "validation failed: 1 violation(s)",
+            "record": {
+                "active": "true",
+                "amount": "828.00",
+                "category": "health",
+                "date": "2026-01-10T16:50:33+05:30",
+                "email": "kenya_rodriguez87@bird.info",
+                "name": "Chaim Larkin",
+                "quantity": "17",
+                "rating": "0.3"
+            },
+            "timestamp": "2026-06-19T11:40:07.749401Z"
+        },
+        {
+            "id": "err-24",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "field 'id' is required but missing or null",
+            "record": {
+                "active": "true",
+                "amount": "492.22",
+                "category": "books",
+                "date": "2025-02-04T16:50:33+05:30",
+                "email": "chazl@santos.com",
+                "name": "Bret Simpson",
+                "quantity": "67",
+                "rating": "0.4"
+            },
+            "timestamp": "2026-06-19T11:40:07.749406Z"
+        },
+        {
+            "id": "err-25",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "validation failed: 1 violation(s)",
+            "record": {
+                "active": "true",
+                "amount": "492.22",
+                "category": "books",
+                "date": "2025-02-04T16:50:33+05:30",
+                "email": "chazl@santos.com",
+                "name": "Bret Simpson",
+                "quantity": "67",
+                "rating": "0.4"
+            },
+            "timestamp": "2026-06-19T11:40:07.749408Z"
+        },
+        {
+            "id": "err-26",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "field 'id' is required but missing or null",
+            "record": {
+                "active": "false",
+                "amount": "23.56",
+                "category": "toys",
+                "date": "2025-09-30T16:50:33+05:30",
+                "email": "jadajohnson@ball.io",
+                "name": "Alejandra Berry",
+                "quantity": "11",
+                "rating": "2.1"
+            },
+            "timestamp": "2026-06-19T11:40:07.749414Z"
+        },
+        {
+            "id": "err-27",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "validation failed: 1 violation(s)",
+            "record": {
+                "active": "false",
+                "amount": "23.56",
+                "category": "toys",
+                "date": "2025-09-30T16:50:33+05:30",
+                "email": "jadajohnson@ball.io",
+                "name": "Alejandra Berry",
+                "quantity": "11",
+                "rating": "2.1"
+            },
+            "timestamp": "2026-06-19T11:40:07.749416Z"
+        },
+        {
+            "id": "err-28",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "field 'id' is required but missing or null",
+            "record": {
+                "active": "true",
+                "amount": "88.19",
+                "category": "automotive",
+                "date": "2025-12-26T16:50:33+05:30",
+                "email": "raquel-woods@muller.info",
+                "name": "Cameron Tyler",
+                "quantity": "98",
+                "rating": "2.5"
+            },
+            "timestamp": "2026-06-19T11:40:07.749421Z"
+        },
+        {
+            "id": "err-29",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "validation failed: 1 violation(s)",
+            "record": {
+                "active": "true",
+                "amount": "88.19",
+                "category": "automotive",
+                "date": "2025-12-26T16:50:33+05:30",
+                "email": "raquel-woods@muller.info",
+                "name": "Cameron Tyler",
+                "quantity": "98",
+                "rating": "2.5"
+            },
+            "timestamp": "2026-06-19T11:40:07.749423Z"
+        },
+        {
+            "id": "err-30",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "field 'id' is required but missing or null",
+            "record": {
+                "active": "true",
+                "amount": "945.64",
+                "category": "health",
+                "date": "2025-12-08T16:50:33+05:30",
+                "email": "cristina.schiller@baldwin.net",
+                "name": "Jerry Stanton",
+                "quantity": "3",
+                "rating": "1.8"
+            },
+            "timestamp": "2026-06-19T11:40:07.749431Z"
+        },
+        {
+            "id": "err-12",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "validation failed: 1 violation(s)",
+            "record": {
+                "active": "true",
+                "amount": "312.77",
+                "category": "sports",
+                "date": "2025-10-12T16:50:33+05:30",
+                "email": "smanning@jones.info",
+                "name": "Althea Ashley",
+                "quantity": "73",
+                "rating": "0.9"
+            },
+            "timestamp": "2026-06-19T11:40:07.749342Z"
+        },
+        {
+            "id": "err-31",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "validation failed: 1 violation(s)",
+            "record": {
+                "active": "true",
+                "amount": "945.64",
+                "category": "health",
+                "date": "2025-12-08T16:50:33+05:30",
+                "email": "cristina.schiller@baldwin.net",
+                "name": "Jerry Stanton",
+                "quantity": "3",
+                "rating": "1.8"
+            },
+            "timestamp": "2026-06-19T11:40:07.749437Z"
+        },
+        {
+            "id": "err-32",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "field 'id' is required but missing or null",
+            "record": {
+                "active": "true",
+                "amount": "690.17",
+                "category": "garden",
+                "date": "2025-02-16T16:50:33+05:30",
+                "email": "ahmed.peters@holt.org",
+                "name": "Janie Rosenbaum",
+                "quantity": "9",
+                "rating": "1.5"
+            },
+            "timestamp": "2026-06-19T11:40:07.749443Z"
+        },
+        {
+            "id": "err-33",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "field 'id' is required but missing or null",
+            "record": {
+                "active": "true",
+                "amount": "682.60",
+                "category": "sports",
+                "date": "2024-10-27T16:50:33+05:30",
+                "email": "kristina.considine@gomez.org",
+                "name": "Chanelle Hayes",
+                "quantity": "27",
+                "rating": "4.0"
+            },
+            "timestamp": "2026-06-19T11:40:07.749444Z"
+        },
+        {
+            "id": "err-34",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "validation failed: 1 violation(s)",
+            "record": {
+                "active": "true",
+                "amount": "690.17",
+                "category": "garden",
+                "date": "2025-02-16T16:50:33+05:30",
+                "email": "ahmed.peters@holt.org",
+                "name": "Janie Rosenbaum",
+                "quantity": "9",
+                "rating": "1.5"
+            },
+            "timestamp": "2026-06-19T11:40:07.749446Z"
+        },
+        {
+            "id": "err-35",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "validation failed: 1 violation(s)",
+            "record": {
+                "active": "true",
+                "amount": "682.60",
+                "category": "sports",
+                "date": "2024-10-27T16:50:33+05:30",
+                "email": "kristina.considine@gomez.org",
+                "name": "Chanelle Hayes",
+                "quantity": "27",
+                "rating": "4.0"
+            },
+            "timestamp": "2026-06-19T11:40:07.749446Z"
+        },
+        {
+            "id": "err-36",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "field 'id' is required but missing or null",
+            "record": {
+                "active": "true",
+                "amount": "380.17",
+                "category": "electronics",
+                "date": "2025-01-06T16:50:33+05:30",
+                "email": "marybryant@jacobi.org",
+                "name": "Rachel Dunn",
+                "quantity": "83",
+                "rating": "0.5"
+            },
+            "timestamp": "2026-06-19T11:40:07.749452Z"
+        },
+        {
+            "id": "err-37",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "field 'id' is required but missing or null",
+            "record": {
+                "active": "true",
+                "amount": "535.62",
+                "category": "food",
+                "date": "2026-02-11T16:50:33+05:30",
+                "email": "agneselliott@reese.net",
+                "name": "Caitlyn Washington",
+                "quantity": "92",
+                "rating": "1.7"
+            },
+            "timestamp": "2026-06-19T11:40:07.749452Z"
+        },
+        {
+            "id": "err-38",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "validation failed: 1 violation(s)",
+            "record": {
+                "active": "true",
+                "amount": "380.17",
+                "category": "electronics",
+                "date": "2025-01-06T16:50:33+05:30",
+                "email": "marybryant@jacobi.org",
+                "name": "Rachel Dunn",
+                "quantity": "83",
+                "rating": "0.5"
+            },
+            "timestamp": "2026-06-19T11:40:07.749454Z"
+        },
+        {
+            "id": "err-39",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "validation failed: 1 violation(s)",
+            "record": {
+                "active": "true",
+                "amount": "535.62",
+                "category": "food",
+                "date": "2026-02-11T16:50:33+05:30",
+                "email": "agneselliott@reese.net",
+                "name": "Caitlyn Washington",
+                "quantity": "92",
+                "rating": "1.7"
+            },
+            "timestamp": "2026-06-19T11:40:07.749455Z"
+        },
+        {
+            "id": "err-40",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "field 'id' is required but missing or null",
+            "record": {
+                "active": "true",
+                "amount": "878.82",
+                "category": "electronics",
+                "date": "2024-09-26T16:50:33+05:30",
+                "email": "bobby.walter@auer.net",
+                "name": "Kylie Torres",
+                "quantity": "15",
+                "rating": "0.8"
+            },
+            "timestamp": "2026-06-19T11:40:07.74946Z"
+        },
+        {
+            "id": "err-41",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "field 'id' is required but missing or null",
+            "record": {
+                "active": "true",
+                "amount": "656.24",
+                "category": "automotive",
+                "date": "2026-01-19T16:50:33+05:30",
+                "email": "harvey.harrington@walsh.info",
+                "name": "Halle Lane",
+                "quantity": "94",
+                "rating": "2.8"
+            },
+            "timestamp": "2026-06-19T11:40:07.749461Z"
+        },
+        {
+            "id": "err-42",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "validation failed: 1 violation(s)",
+            "record": {
+                "active": "true",
+                "amount": "878.82",
+                "category": "electronics",
+                "date": "2024-09-26T16:50:33+05:30",
+                "email": "bobby.walter@auer.net",
+                "name": "Kylie Torres",
+                "quantity": "15",
+                "rating": "0.8"
+            },
+            "timestamp": "2026-06-19T11:40:07.749462Z"
+        },
+        {
+            "id": "err-43",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "validation failed: 1 violation(s)",
+            "record": {
+                "active": "true",
+                "amount": "656.24",
+                "category": "automotive",
+                "date": "2026-01-19T16:50:33+05:30",
+                "email": "harvey.harrington@walsh.info",
+                "name": "Halle Lane",
+                "quantity": "94",
+                "rating": "2.8"
+            },
+            "timestamp": "2026-06-19T11:40:07.749464Z"
+        },
+        {
+            "id": "err-44",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "field 'id' is required but missing or null",
+            "record": {
+                "active": "true",
+                "amount": "781.65",
+                "category": "sports",
+                "date": "2025-10-17T16:50:33+05:30",
+                "email": "glenhills63@gray.org",
+                "name": "Margaret Gleason",
+                "quantity": "81",
+                "rating": "1.1"
+            },
+            "timestamp": "2026-06-19T11:40:07.749466Z"
+        },
+        {
+            "id": "err-47",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "validation failed: 1 violation(s)",
+            "record": {
+                "active": "true",
+                "amount": "781.65",
+                "category": "sports",
+                "date": "2025-10-17T16:50:33+05:30",
+                "email": "glenhills63@gray.org",
+                "name": "Margaret Gleason",
+                "quantity": "81",
+                "rating": "1.1"
+            },
+            "timestamp": "2026-06-19T11:40:07.749477Z"
+        },
+        {
+            "id": "err-48",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "field 'id' is required but missing or null",
+            "record": {
+                "active": "true",
+                "amount": "31.76",
+                "category": "furniture",
+                "date": "2024-10-23T16:50:33+05:30",
+                "email": "zcampbell@weber.com",
+                "name": "Rocky Harris",
+                "quantity": "57",
+                "rating": "3.8"
+            },
+            "timestamp": "2026-06-19T11:40:07.749483Z"
+        },
+        {
+            "id": "err-49",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "validation failed: 1 violation(s)",
+            "record": {
+                "active": "true",
+                "amount": "31.76",
+                "category": "furniture",
+                "date": "2024-10-23T16:50:33+05:30",
+                "email": "zcampbell@weber.com",
+                "name": "Rocky Harris",
+                "quantity": "57",
+                "rating": "3.8"
+            },
+            "timestamp": "2026-06-19T11:40:07.749485Z"
+        },
+        {
+            "id": "err-50",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "field 'id' is required but missing or null",
+            "record": {
+                "active": "false",
+                "amount": "241.19",
+                "category": "automotive",
+                "date": "2025-06-29T16:50:33+05:30",
+                "email": "fay.graves@blake.io",
+                "name": "Gracie Fox",
+                "quantity": "47",
+                "rating": "4.0"
+            },
+            "timestamp": "2026-06-19T11:40:07.74949Z"
+        },
+        {
+            "id": "err-51",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "validation failed: 1 violation(s)",
+            "record": {
+                "active": "false",
+                "amount": "241.19",
+                "category": "automotive",
+                "date": "2025-06-29T16:50:33+05:30",
+                "email": "fay.graves@blake.io",
+                "name": "Gracie Fox",
+                "quantity": "47",
+                "rating": "4.0"
+            },
+            "timestamp": "2026-06-19T11:40:07.749492Z"
+        },
+        {
+            "id": "err-52",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "field 'id' is required but missing or null",
+            "record": {
+                "active": "false",
+                "amount": "877.60",
+                "category": "toys",
+                "date": "2025-10-18T16:50:33+05:30",
+                "email": "austenmills@boyle.com",
+                "name": "Angelina Crawford",
+                "quantity": "33",
+                "rating": "1.9"
+            },
+            "timestamp": "2026-06-19T11:40:07.749497Z"
+        },
+        {
+            "id": "err-45",
+            "job_id": "5d932496-fbfd-4443-bc3d-6c29772c57f3",
+            "stage": "validator",
+            "message": "field 'id' is required but missing or null",
+            "record": {
+                "active": "true",
+                "amount": "346.43",
+                "category": "sports",
+                "date": "2025-04-04T16:50:33+05:30",
+                "email": "psnyder42@wyman.biz",
+                "name": "Hillary Swift",
+                "quantity": "16",
+                "rating": "0.2"
+            },
+            "timestamp": "2026-06-19T11:40:07.749468Z"
+        }
+    ],
+    "total": 15819059,
+    "offset": 0,
+    "limit": 50
+}

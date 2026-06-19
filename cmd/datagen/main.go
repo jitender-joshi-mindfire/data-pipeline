@@ -23,6 +23,7 @@ import (
 var categories = []string{"electronics", "clothing", "food", "furniture", "automotive", "sports", "books", "toys", "health", "garden"}
 
 type Record struct {
+	ID       string  `json:"id"`
 	Name     string  `json:"name"`
 	Email    string  `json:"email"`
 	Amount   float64 `json:"amount"`
@@ -87,10 +88,10 @@ func generateCSV(w *os.File, rows int, invalidPct float64, faker *gofakeit.Faker
 	defer writer.Flush()
 
 	// Header
-	writer.Write([]string{"name", "email", "amount", "date", "category", "active", "quantity", "rating"})
+	writer.Write([]string{"id", "name", "email", "amount", "date", "category", "active", "quantity", "rating"})
 
 	for i := 0; i < rows; i++ {
-		rec := generateRecord(faker, rng)
+		rec := generateRecord(i+1, faker, rng)
 		isInvalid := rng.Float64()*100 < invalidPct
 
 		if isInvalid {
@@ -98,6 +99,7 @@ func generateCSV(w *os.File, rows int, invalidPct float64, faker *gofakeit.Faker
 		}
 
 		writer.Write([]string{
+			rec.ID,
 			rec.Name,
 			rec.Email,
 			fmt.Sprintf("%.2f", rec.Amount),
@@ -114,7 +116,7 @@ func generateJSON(w *os.File, rows int, invalidPct float64, faker *gofakeit.Fake
 	records := make([]interface{}, 0, rows)
 
 	for i := 0; i < rows; i++ {
-		rec := generateRecord(faker, rng)
+		rec := generateRecord(i+1, faker, rng)
 		isInvalid := rng.Float64()*100 < invalidPct
 
 		if isInvalid {
@@ -131,13 +133,14 @@ func generateJSON(w *os.File, rows int, invalidPct float64, faker *gofakeit.Fake
 	encoder.Encode(records)
 }
 
-func generateRecord(faker *gofakeit.Faker, rng *rand.Rand) Record {
+func generateRecord(seq int, faker *gofakeit.Faker, rng *rand.Rand) Record {
 	// Generate realistic date within last 2 years
 	baseDate := time.Now().AddDate(-2, 0, 0)
 	daysOffset := rng.Intn(730)
 	date := baseDate.AddDate(0, 0, daysOffset)
 
 	return Record{
+		ID:       fmt.Sprintf("rec-%06d", seq),
 		Name:     faker.Name(),
 		Email:    faker.Email(),
 		Amount:   float64(rng.Intn(100000)) / 100.0, // 0.00 - 999.99
@@ -169,6 +172,7 @@ func corruptRecord(rec Record, rng *rand.Rand) Record {
 func corruptRecordJSON(rec Record, rng *rand.Rand) map[string]interface{} {
 	// Convert to map and corrupt
 	m := map[string]interface{}{
+		"id":       rec.ID,
 		"name":     rec.Name,
 		"email":    rec.Email,
 		"amount":   rec.Amount,
