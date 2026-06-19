@@ -1,0 +1,37 @@
+{
+  "_comment": "Ingests the UCI Iris dataset CSV over HTTP. No header row — field names come from the schema.",
+  "sources": [
+    {
+      "type": "csv",
+      "path": "https://people.sc.fsu.edu/~jburkardt/data/csv/hw_200.csv",
+      "timeout_seconds": 30
+    }
+  ],
+  "validation": {
+    "fields": [
+      {"name": "\"Index\"",  "type": "number", "required": true},
+      {"name": "\"Height(Inches)\"", "type": "number", "required": true},
+      {"name": "\"Weight(Pounds)\"", "type": "number", "required": true}
+    ]
+  },
+  "transformations": [
+    {"field": "\"Height(Inches)\"", "operation": "type_convert", "target_type": "number"},
+    {"field": "\"Weight(Pounds)\"", "operation": "type_convert", "target_type": "number"}
+  ],
+  "aggregation": {
+    "functions": [
+      {"name": "count",   "field": "*",                  "alias": "total_people"},
+      {"name": "average", "field": "\"Height(Inches)\"", "alias": "avg_height_inches"},
+      {"name": "average", "field": "\"Weight(Pounds)\"", "alias": "avg_weight_pounds"}
+    ]
+  },
+  "exports": [
+    {"type": "json", "path": "./output/hw200_summary.json"},
+    {"type": "csv",  "path": "./output/hw200_summary.csv"}
+  ],
+  "worker_pools": {
+    "validator":   2,
+    "transformer": 2
+  },
+  "timeout_seconds": 60
+}

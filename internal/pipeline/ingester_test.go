@@ -204,7 +204,7 @@ func TestCSVSource_FileNotFound(t *testing.T) {
 	// Error should be logged to ErrorStore
 	errs, total := errStore.GetByJob("job-1", 0, 50)
 	assert.Equal(t, 1, total)
-	assert.Contains(t, errs[0].Message, "failed to open CSV file")
+	assert.Contains(t, errs[0].Message, "failed to open CSV source")
 	assert.Equal(t, "ingester", errs[0].Stage)
 }
 

@@ -1,0 +1,36 @@
+{
+  "_comment": "Ingests RandomUser API. Returns a wrapped object — use the HTTP source which expects a JSON array. Note: RandomUser wraps results in {results:[...]}, so a proxy or preprocessing step is needed for production use. This config demonstrates the HTTP source pattern.",
+  "sources": [
+    {
+      "type": "http",
+      "path": "https://jsonplaceholder.typicode.com/users",
+      "timeout_seconds": 30
+    }
+  ],
+  "validation": {
+    "fields": [
+      {"name": "id",       "type": "number", "required": true},
+      {"name": "name",     "type": "string", "required": true},
+      {"name": "email",    "type": "string", "required": true, "pattern": "^[\\w.]+@[\\w.]+$"},
+      {"name": "username", "type": "string", "required": true}
+    ]
+  },
+  "transformations": [
+    {"field": "name",  "operation": "trim"},
+    {"field": "email", "operation": "lowercase"}
+  ],
+  "aggregation": {
+    "functions": [
+      {"name": "count", "field": "*", "alias": "total_users"}
+    ]
+  },
+  "exports": [
+    {"type": "json", "path": "./output/users_summary.json"},
+    {"type": "csv",  "path": "./output/users_summary.csv"}
+  ],
+  "worker_pools": {
+    "validator":   2,
+    "transformer": 2
+  },
+  "timeout_seconds": 30
+}

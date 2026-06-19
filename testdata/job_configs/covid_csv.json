@@ -1,0 +1,44 @@
+{
+  "_comment": "Ingests the Our World in Data COVID-19 CSV directly over HTTP. No local file needed.",
+  "sources": [
+    {
+      "type": "csv",
+      "path": "https://covid.ourworldindata.org/data/owid-covid-data.csv",
+      "timeout_seconds": 120
+    }
+  ],
+  "validation": {
+    "fields": [
+      {"name": "location",        "type": "string",  "required": true},
+      {"name": "date",            "type": "string",  "required": true},
+      {"name": "total_cases",     "type": "number",  "required": false},
+      {"name": "new_cases",       "type": "number",  "required": false},
+      {"name": "total_deaths",    "type": "number",  "required": false}
+    ]
+  },
+  "transformations": [
+    {"field": "total_cases",  "operation": "type_convert", "target_type": "number"},
+    {"field": "new_cases",    "operation": "type_convert", "target_type": "number"},
+    {"field": "total_deaths", "operation": "type_convert", "target_type": "number"},
+    {"field": "location",     "operation": "trim"}
+  ],
+  "aggregation": {
+    "group_by": ["location"],
+    "functions": [
+      {"name": "count",   "field": "*",          "alias": "record_count"},
+      {"name": "sum",     "field": "new_cases",  "alias": "total_new_cases"},
+      {"name": "average", "field": "new_cases",  "alias": "avg_daily_cases"},
+      {"name": "sum",     "field": "total_deaths","alias": "max_total_deaths"}
+    ]
+  },
+  "exports": [
+    {"type": "sqlite", "path": "./output/covid_summary.db",  "table_name": "covid_by_location"},
+    {"type": "json",   "path": "./output/covid_summary.json"},
+    {"type": "csv",    "path": "./output/covid_summary.csv"}
+  ],
+  "worker_pools": {
+    "validator":   4,
+    "transformer": 4
+  },
+  "timeout_seconds": 300
+}

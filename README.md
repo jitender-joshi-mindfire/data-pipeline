@@ -57,6 +57,12 @@ go test ./internal/pipeline/...
 
 # Run with race detector
 go test -race ./...
+
+# Run load tests (10K–50K records, throughput benchmarks)
+go test -tags load -timeout 120s -v ./internal/pipeline/ -run TestLoad
+
+# Run real-world API tests (requires internet access; auto-skips if APIs are unreachable)
+go test -tags load -timeout 120s -v ./internal/pipeline/ -run TestRealWorld
 ```
 
 ## Configuration
@@ -302,9 +308,56 @@ curl -X DELETE http://localhost:8080/api/v1/pipelines/job-a1b2c3d4
 
 **Response:** `204 No Content`
 
+## Real-World Data Sources
+
+The pipeline supports CSV files fetched directly over HTTP (no local download needed). The following real-world sources are included as example job configurations in `testdata/job_configs/`:
+
+### CSV over HTTP
+
+| Source | URL | Records | Job Config |
+|--------|-----|---------|------------|
+| FSU Height/Weight | `https://people.sc.fsu.edu/~jburkardt/data/csv/hw_200.csv` | 200 | `iris_csv.json` |
+| Our World in Data COVID-19 | `https://covid.ourworldindata.org/data/owid-covid-data.csv` | 300K+ | `covid_csv.json` |
+
+Use as a CSV source in your job config:
+```json
+{"type": "csv", "path": "https://people.sc.fsu.edu/~jburkardt/data/csv/hw_200.csv", "timeout_seconds": 30}
+```
+
+### JSON HTTP APIs (assignment-specified sources)
+
+| Purpose | Endpoint | Records |
+|---------|----------|---------|
+| Posts (group by userId) | `https://jsonplaceholder.typicode.com/posts` | 100 |
+| Comments (group by postId) | `https://jsonplaceholder.typicode.com/comments` | 500 |
+| Users | `https://jsonplaceholder.typicode.com/users` | 10 |
+| Products with categories | `https://dummyjson.com/products?limit=0` | 194 |
+
+### Mixed-Source "Global Daily Report" Example
+
+The `testdata/job_configs/global_daily_report.json` config demonstrates the assignment's mixed-source scenario: a CSV source over HTTP and two JSON API sources ingested concurrently (800 total records):
+
+```bash
+curl -X POST http://localhost:8080/api/v1/pipelines \
+  -H "Content-Type: application/json" \
+  -d @testdata/job_configs/global_daily_report.json
+```
+
+### Generating Large Test Data
+
+```bash
+# Generate 10K CSV records with ~5% invalid data
+go run ./cmd/datagen -rows 10000 -format csv -output testdata/large/my_data.csv
+
+# Generate 100K JSON records
+go run ./cmd/datagen -rows 100000 -format json -output testdata/large/my_data.json -invalid-pct 0
+```
+
 ## Design
 
-### Concurrency Model
+See [DESIGN_REPORT.md](./DESIGN_REPORT.md) for the full design report (≤1 page) covering the concurrency model, worker pool sizing rationale, channel buffering strategy, and tradeoffs.
+
+### Concurrency Model (summary)
 
 The pipeline uses Go's concurrency primitives to achieve parallel data processing:
 

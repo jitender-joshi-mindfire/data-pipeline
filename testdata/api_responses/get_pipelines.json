@@ -1,0 +1,28 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/api/v1/pipelines"
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "jobs": [
+        {
+          "id": "job_01J9XK2M4N8QRTV6W0CZBHFD3P",
+          "status": "completed",
+          "created_at": "2026-06-19T10:15:00Z"
+        },
+        {
+          "id": "job_01J9XK7P2R4STUW8Y1DVBCMGE6Q",
+          "status": "running",
+          "created_at": "2026-06-19T10:42:30Z"
+        },
+        {
+          "id": "job_01J9XKBF5T6UVWX9Z2EWCDNHG7R",
+          "status": "failed",
+          "created_at": "2026-06-19T09:58:12Z"
+        }
+      ]
+    }
+  }
+}

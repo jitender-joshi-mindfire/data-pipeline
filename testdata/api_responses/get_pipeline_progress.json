@@ -1,0 +1,29 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/api/v1/pipelines/job_01J9XK7P2R4STUW8Y1DVBCMGE6Q/progress"
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "records_processed": 42800,
+      "records_pending": 41431,
+      "percent_complete": 51,
+      "processing_rate": 1420.5,
+      "stage_latencies": {
+        "ingester":    2.1,
+        "validator":   0.8,
+        "transformer": 1.3,
+        "aggregator":  0.4,
+        "exporter":    3.7
+      },
+      "error_counts": {
+        "ingester":    0,
+        "validator":   312,
+        "transformer": 14,
+        "aggregator":  0,
+        "exporter":    0
+      }
+    }
+  }
+}

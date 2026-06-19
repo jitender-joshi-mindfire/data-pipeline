@@ -1,0 +1,54 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/api/v1/pipelines/job_01J9XK2M4N8QRTV6W0CZBHFD3P/errors?offset=0&limit=3"
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "errors": [
+        {
+          "id":        "err_01J9XK2N5A7BRTV6W0CZBHFD3P",
+          "job_id":    "job_01J9XK2M4N8QRTV6W0CZBHFD3P",
+          "stage":     "validator",
+          "message":   "field 'cases' is required but missing",
+          "record": {
+            "date":     "2020-03-15",
+            "location": "World",
+            "deaths":   "12"
+          },
+          "timestamp": "2026-06-19T10:15:03Z"
+        },
+        {
+          "id":        "err_01J9XK2P6B8CSUW7X1DACIHE4Q",
+          "job_id":    "job_01J9XK2M4N8QRTV6W0CZBHFD3P",
+          "stage":     "validator",
+          "message":   "field 'cases' value -5 is below minimum 0",
+          "record": {
+            "date":     "2021-07-22",
+            "location": "Albania",
+            "cases":    "-5",
+            "deaths":   "0"
+          },
+          "timestamp": "2026-06-19T10:15:04Z"
+        },
+        {
+          "id":        "err_01J9XK2Q7C9DTVX8Y2EBDJIF5R",
+          "job_id":    "job_01J9XK2M4N8QRTV6W0CZBHFD3P",
+          "stage":     "transformer",
+          "message":   "type_convert failed for field 'cases': cannot parse 'N/A' as number",
+          "record": {
+            "date":     "2020-01-01",
+            "location": "Faeroe Islands",
+            "cases":    "N/A",
+            "deaths":   "0"
+          },
+          "timestamp": "2026-06-19T10:15:07Z"
+        }
+      ],
+      "total":  326,
+      "offset": 0,
+      "limit":  3
+    }
+  }
+}

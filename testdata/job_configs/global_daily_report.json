@@ -1,0 +1,42 @@
+{
+  "_comment": "Assignment scenario: Mixed Data Simulation — Global Daily Report. Ingests from CSV (population data), JSON API (JSONPlaceholder posts as stand-in for structured data), and a second HTTP JSON source concurrently. Demonstrates fan-out ingestion across source types.",
+  "sources": [
+    {
+      "_comment": "CSV source: height/weight population dataset fetched over HTTP",
+      "type": "csv",
+      "path": "https://people.sc.fsu.edu/~jburkardt/data/csv/hw_200.csv",
+      "timeout_seconds": 30
+    },
+    {
+      "_comment": "JSON API source: JSONPlaceholder posts (100 records)",
+      "type": "http",
+      "path": "https://jsonplaceholder.typicode.com/posts",
+      "timeout_seconds": 30
+    },
+    {
+      "_comment": "JSON API source: JSONPlaceholder comments (500 records)",
+      "type": "http",
+      "path": "https://jsonplaceholder.typicode.com/comments",
+      "timeout_seconds": 30
+    }
+  ],
+  "validation": {
+    "fields": []
+  },
+  "transformations": [],
+  "aggregation": {
+    "functions": [
+      {"name": "count", "field": "*", "alias": "total_records_ingested"}
+    ]
+  },
+  "exports": [
+    {"type": "json", "path": "./output/global_daily_report.json"},
+    {"type": "csv",  "path": "./output/global_daily_report.csv"},
+    {"type": "sqlite", "path": "./output/global_daily_report.db", "table_name": "daily_report"}
+  ],
+  "worker_pools": {
+    "validator":   4,
+    "transformer": 4
+  },
+  "timeout_seconds": 120
+}

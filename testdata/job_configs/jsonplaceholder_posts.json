@@ -1,0 +1,37 @@
+{
+  "_comment": "Ingests JSONPlaceholder posts API. Returns a JSON array of 100 posts.",
+  "sources": [
+    {
+      "type": "http",
+      "path": "https://jsonplaceholder.typicode.com/posts",
+      "timeout_seconds": 30
+    }
+  ],
+  "validation": {
+    "fields": [
+      {"name": "id",     "type": "number", "required": true},
+      {"name": "userId", "type": "number", "required": true},
+      {"name": "title",  "type": "string", "required": true},
+      {"name": "body",   "type": "string", "required": true}
+    ]
+  },
+  "transformations": [
+    {"field": "title", "operation": "trim"},
+    {"field": "title", "operation": "lowercase"}
+  ],
+  "aggregation": {
+    "group_by": ["userId"],
+    "functions": [
+      {"name": "count", "field": "*", "alias": "posts_per_user"}
+    ]
+  },
+  "exports": [
+    {"type": "json", "path": "./output/jsonplaceholder_posts_summary.json"},
+    {"type": "csv",  "path": "./output/jsonplaceholder_posts_summary.csv"}
+  ],
+  "worker_pools": {
+    "validator":   2,
+    "transformer": 2
+  },
+  "timeout_seconds": 60
+}

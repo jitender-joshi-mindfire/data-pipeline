@@ -1,0 +1,53 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/api/v1/pipelines/job_01J9XK2M4N8QRTV6W0CZBHFD3P/results"
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "results": [
+        {
+          "location":        "UNITED STATES",
+          "total_cases":     103436829,
+          "total_deaths":    1127152,
+          "avg_daily_cases": 82068.9,
+          "record_count":    1260
+        },
+        {
+          "location":        "INDIA",
+          "total_cases":     44690104,
+          "total_deaths":    530779,
+          "avg_daily_cases": 35468.3,
+          "record_count":    1260
+        },
+        {
+          "location":        "BRAZIL",
+          "total_cases":     37076053,
+          "total_deaths":    699276,
+          "avg_daily_cases": 29425.4,
+          "record_count":    1260
+        },
+        {
+          "location":        "FRANCE",
+          "total_cases":     38997490,
+          "total_deaths":    167985,
+          "avg_daily_cases": 30950.4,
+          "record_count":    1260
+        },
+        {
+          "location":        "GERMANY",
+          "total_cases":     38437756,
+          "total_deaths":    174979,
+          "avg_daily_cases": 30506.2,
+          "record_count":    1260
+        }
+      ],
+      "metadata": {
+        "total_input_records":  84231,
+        "total_output_records": 5,
+        "completed_at":         "2026-06-19T10:16:02Z"
+      }
+    }
+  }
+}

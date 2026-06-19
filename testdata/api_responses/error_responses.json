@@ -1,0 +1,42 @@
+{
+  "examples": [
+    {
+      "scenario": "Job not found",
+      "request":  { "method": "GET", "path": "/api/v1/pipelines/job_nonexistent" },
+      "response": {
+        "status": 404,
+        "body":   { "error": "job not found: job_nonexistent" }
+      }
+    },
+    {
+      "scenario": "Invalid job config — missing sources",
+      "request":  { "method": "POST", "path": "/api/v1/pipelines", "body": { "sources": [] } },
+      "response": {
+        "status": 400,
+        "body": {
+          "error": "invalid job configuration",
+          "details": [
+            { "field": "sources", "message": "at least one source is required" },
+            { "field": "aggregation.functions", "message": "at least one aggregation function is required" }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "Results unavailable — job still running",
+      "request":  { "method": "GET", "path": "/api/v1/pipelines/job_01J9XK7P2R4STUW8Y1DVBCMGE6Q/results" },
+      "response": {
+        "status": 409,
+        "body":   { "error": "job is still in progress" }
+      }
+    },
+    {
+      "scenario": "Cannot delete a running job",
+      "request":  { "method": "DELETE", "path": "/api/v1/pipelines/job_01J9XK7P2R4STUW8Y1DVBCMGE6Q" },
+      "response": {
+        "status": 409,
+        "body":   { "error": "job is currently running; cancel it before deletion" }
+      }
+    }
+  ]
+}

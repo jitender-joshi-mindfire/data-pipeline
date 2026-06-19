@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "PATCH",
+    "path": "/api/v1/pipelines/job_01J9XK7P2R4STUW8Y1DVBCMGE6Q/cancel"
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "id":     "job_01J9XK7P2R4STUW8Y1DVBCMGE6Q",
+      "status": "cancelled"
+    }
+  }
+}

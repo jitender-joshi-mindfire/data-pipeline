@@ -1,0 +1,10 @@
+{
+  "request": {
+    "method": "DELETE",
+    "path": "/api/v1/pipelines/job_01J9XK2M4N8QRTV6W0CZBHFD3P"
+  },
+  "response": {
+    "status": 204,
+    "body": null
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/api/v1/pipelines",
+    "body": {
+      "sources": [
+        {
+          "type": "http",
+          "path": "https://covid.ourworldindata.org/data/owid-covid-data.csv",
+          "timeout_seconds": 30
+        },
+        {
+          "type": "json",
+          "path": "https://jsonplaceholder.typicode.com/posts"
+        }
+      ],
+      "validation": {
+        "fields": [
+          { "name": "date",   "type": "date",   "required": true },
+          { "name": "cases",  "type": "number", "required": true, "min": 0 },
+          { "name": "deaths", "type": "number", "required": false, "min": 0 }
+        ]
+      },
+      "transformations": [
+        { "field": "date",     "operation": "type_convert", "target_type": "date" },
+        { "field": "location", "operation": "uppercase" },
+        { "field": "cases",    "operation": "type_convert", "target_type": "number" }
+      ],
+      "aggregation": {
+        "group_by": ["location"],
+        "functions": [
+          { "name": "sum",     "field": "cases",  "alias": "total_cases" },
+          { "name": "sum",     "field": "deaths", "alias": "total_deaths" },
+          { "name": "average", "field": "cases",  "alias": "avg_daily_cases" },
+          { "name": "count",   "field": "date",   "alias": "record_count" }
+        ]
+      },
+      "exports": [
+        { "type": "sqlite", "path": "./output/results.db", "table_name": "covid_summary" },
+        { "type": "json",   "path": "./output/results.json" }
+      ],
+      "worker_pools": {
+        "ingester":    3,
+        "validator":   5,
+        "transformer": 5,
+        "aggregator":  1,
+        "exporter":    2
+      },
+      "timeout_seconds": 120
+    }
+  },
+  "response": {
+    "status": 201,
+    "body": {
+      "id": "job_01J9XK2M4N8QRTV6W0CZBHFD3P",
+      "status": "queued",
+      "created_at": "2026-06-19T10:15:00Z"
+    }
+  }
+}
