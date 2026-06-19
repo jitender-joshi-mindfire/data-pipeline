@@ -1,387 +1,865 @@
 # Data Processing Pipeline
 
-A concurrent data processing pipeline system built in Go. It ingests data from multiple sources (CSV, JSON, HTTP APIs), validates, transforms, aggregates, and exports results through five sequential stages connected by buffered channels. A REST API exposes job lifecycle management, real-time progress tracking, error inspection, and result retrieval.
+A concurrent, multi-stage data processing pipeline built in Go. It ingests data from CSV files, JSON files, and HTTP APIs; validates and transforms each record; computes aggregations; and exports results to SQLite, PostgreSQL, CSV, or JSON — all managed through a REST API with real-time progress tracking, error inspection, and Prometheus metrics.
 
-## Prerequisites
+---
 
-- **Go 1.21+** (project uses Go 1.23)
-- **CGO enabled** (required for SQLite support via `go-sqlite3`)
-  - On macOS: Xcode Command Line Tools (`xcode-select --install`)
-  - On Linux: `gcc` or `build-essential` package
-- **Git** (for dependency management)
+## Table of Contents
 
-## Dependencies
+1. [Prerequisites & Dependencies](#1-prerequisites--dependencies)
+2. [Build & Run](#2-build--run)
+3. [System Architecture](#3-system-architecture)
+4. [How the Pipeline Works](#4-how-the-pipeline-works)
+5. [REST API Reference](#5-rest-api-reference)
+6. [Running on Different Dataset Sizes](#6-running-on-different-dataset-sizes)
+7. [Prometheus Metrics](#7-prometheus-metrics)
+8. [PostgreSQL Export Target](#8-postgresql-export-target)
+9. [Project Structure](#9-project-structure)
+10. [Testing](#10-testing)
+
+---
+
+## 1. Prerequisites & Dependencies
+
+**Runtime requirements:**
+
+| Requirement | Version | Notes |
+|-------------|---------|-------|
+| Go | 1.23+ | Uses `net/http` pattern matching from 1.22 |
+| CGO | enabled | Required for SQLite via `go-sqlite3` |
+| C compiler | any | macOS: `xcode-select --install` · Linux: `gcc` / `build-essential` |
+
+**Go module dependencies:**
 
 | Package | Purpose |
 |---------|---------|
-| `github.com/mattn/go-sqlite3` | SQLite export target (requires CGO) |
+| `github.com/mattn/go-sqlite3` | SQLite export target (CGO) |
+| `github.com/prometheus/client_golang` | `/metrics` endpoint |
+| `github.com/brianvoe/gofakeit/v7` | Synthetic data generation |
 | `github.com/stretchr/testify` | Test assertions |
 | `pgregory.net/rapid` | Property-based testing |
 
-## Build
+---
+
+## 2. Build & Run
+
+### Install dependencies
 
 ```bash
-# Build the server binary
-go build ./cmd/server
-
-# Build with CGO explicitly enabled (if needed)
-CGO_ENABLED=1 go build ./cmd/server
+go mod download
 ```
 
-## Run
+### Build
 
 ```bash
-# Run directly
+# Standard build
+go build -o server ./cmd/server
+
+# Explicit CGO (needed on some CI environments)
+CGO_ENABLED=1 go build -o server ./cmd/server
+```
+
+### Run the server
+
+```bash
+# Default port :8080
 go run ./cmd/server
 
-# Or run the built binary
-./server
-
-# With custom port
+# Custom port
 PORT=9090 go run ./cmd/server
+
+# Run the pre-built binary
+./server
 ```
 
-The server starts on port `:8080` by default. Set the `PORT` environment variable to override.
+The server logs each request with method, path, status, and latency:
 
-## Test
+```
+2026/06/19 10:15:00 Starting server on :8080
+2026/06/19 10:15:03 POST /api/v1/pipelines 201 1.2ms
+2026/06/19 10:15:04 GET  /api/v1/pipelines/abc123/progress 200 0.3ms
+```
+
+### Environment variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | `8080` | HTTP listen port |
+
+---
+
+## 3. System Architecture
+
+### High-level overview
+
+```
+                         ┌──────────────────────────────────────────────────────┐
+                         │                  REST API  (:8080)                   │
+                         │                                                      │
+                         │  POST   /api/v1/pipelines          — create job      │
+                         │  GET    /api/v1/pipelines          — list jobs       │
+                         │  GET    /api/v1/pipelines/:id      — job details     │
+                         │  GET    /api/v1/pipelines/:id/progress               │
+                         │  GET    /api/v1/pipelines/:id/results                │
+                         │  GET    /api/v1/pipelines/:id/errors                 │
+                         │  PATCH  /api/v1/pipelines/:id/cancel                 │
+                         │  DELETE /api/v1/pipelines/:id                        │
+                         │  GET    /metrics                   — Prometheus      │
+                         └───────────────────┬──────────────────────────────────┘
+                                             │ creates & monitors
+                         ┌───────────────────▼──────────────────────────────────┐
+                         │                Pipeline Engine                        │
+                         │                                                      │
+   ┌──────────────┐      │  ┌──────────┐  ch1  ┌──────────┐  ch2  ┌──────────┐ │
+   │ Data Sources │      │  │          ├───────►│          ├───────►│          │ │
+   │              │      │  │ Ingester │       │ Validator│       │Transform │ │
+   │  CSV files   ├─────►│  │ (fan-out)│       │ (fan-out)│       │ (fan-out)│ │
+   │  JSON files  │      │  └──────────┘       └──────────┘       └────┬─────┘ │
+   │  HTTP APIs   │      │                                         ch3  │       │
+   └──────────────┘      │            ┌──────────────────────────────────▼──┐   │
+                         │            │  Aggregator (fan-in) ──ch4──► Exporter│ │
+                         │            └────────────────────────────────────┬─┘  │
+                         └────────────────────────────────────────────────┼────┘
+                                                                          │
+                         ┌────────────────────────────────────────────────▼──────┐
+                         │                  Export Targets                        │
+                         │                                                        │
+                         │   SQLite database (.db)                                │
+                         │   CSV file (.csv)                                      │
+                         │   JSON file (.json)                                    │
+                         └────────────────────────────────────────────────────────┘
+```
+
+### Side channels (always running alongside the main pipeline)
+
+```
+Every stage ──► errorCh ──► Error Collector ──► ErrorStore  (queryable via API)
+Every stage ──► progressCh ──► Progress Tracker ──► ProgressStore (queryable via API + /metrics)
+context.Context ──────────────────────────────────► all goroutines (cancellation / timeout)
+```
+
+### Component responsibilities
+
+| Component | Package | Role |
+|-----------|---------|------|
+| `Handler` | `internal/api` | HTTP request handling for all endpoints |
+| `Router` | `internal/api` | Route registration, middleware chain, Prometheus registry |
+| `Pipeline` | `internal/pipeline` | Orchestrates stage goroutines, channels, worker pools |
+| `JobStore` | `internal/store` | In-memory CRUD for job metadata |
+| `ErrorStore` | `internal/store` | Append-only in-memory error log per job |
+| `ProgressTracker` | `internal/store` | Atomic counters and latency tracking per job |
+| `ResultStore` | `internal/api` | In-memory storage of aggregated output |
+| Export targets | `internal/export` | SQLite / CSV / JSON writers |
+
+---
+
+## 4. How the Pipeline Works
+
+### Step-by-step data flow
+
+```
+Job config (JSON)
+      │
+      ▼
+[1] POST /api/v1/pipelines
+      │  ── validates config
+      │  ── creates Job{status: queued}
+      │  ── spawns goroutine → returns 201 immediately
+      │
+      ▼
+[2] Ingester stage
+      │  ── one goroutine per source (fan-out)
+      │  ── CSV source: reads row-by-row, emits Record per row
+      │  ── JSON source: reads file/response body, emits Record per array element
+      │  ── HTTP source: GETs URL, parses JSON array, emits Records
+      │  ── all sources write to ch1 (buffered, size 100)
+      │  ── closes ch1 when all sources are drained
+      │
+      ▼  ch1 (chan *Record, buf 100)
+[3] Validator stage
+      │  ── N worker goroutines (fan-out) pull from ch1
+      │  ── each record is checked against the schema: required fields,
+      │     type constraints, min/max, regex patterns
+      │  ── valid records → ch2
+      │  ── invalid records → errorCh (stored in ErrorStore, skipped)
+      │
+      ▼  ch2 (chan *Record, buf 100)
+[4] Transformer stage
+      │  ── N worker goroutines pull from ch2
+      │  ── applies transformations in order: trim, lowercase, uppercase,
+      │     type_convert (string→number/date/boolean), enrich
+      │  ── failed conversions → errorCh
+      │  ── transformed records → ch3
+      │
+      ▼  ch3 (chan *Record, buf 100)
+[5] Aggregator stage
+      │  ── single goroutine (fan-in) accumulates all records
+      │  ── groups by configured fields, computes count / sum / average
+      │  ── when ch3 closes: emits aggregated rows to ch4
+      │
+      ▼  ch4 (chan map[string]interface{}, buf 100)
+[6] Exporter stage
+      │  ── one goroutine per export target (parallel)
+      │  ── writes each aggregated row to SQLite / CSV / JSON
+      │  ── stores results in ResultStore for API retrieval
+      │
+      ▼
+Job{status: completed}   ──  results available at GET /pipelines/:id/results
+```
+
+### Goroutine lifecycle
+
+Every stage goroutine:
+1. **Reads** from its input channel until it is closed (signals end-of-stream).
+2. **Writes** results to its output channel.
+3. **Checks `ctx.Done()`** between records — exits immediately on cancellation or timeout.
+4. **Decrements a `sync.WaitGroup`** when done. The output channel is closed only after all workers in that stage have exited, guaranteeing no data is lost and the next stage terminates cleanly.
+
+### Back-pressure
+
+Buffered channels (size 100) provide natural back-pressure. If the Exporter is slower than the Aggregator, ch4 fills up and the Aggregator blocks — it does not race ahead and exhaust memory. This self-regulates the entire pipeline without explicit throttling logic.
+
+### Cancellation and timeouts
+
+A `context.Context` is created per job with an optional deadline (`timeout_seconds` in the config). The context is passed to every goroutine. Calling `PATCH /api/v1/pipelines/:id/cancel` triggers the stored `context.CancelFunc`, which propagates immediately to all stage goroutines. They finish the record currently in flight and then exit.
+
+---
+
+## 5. REST API Reference
+
+### Create a pipeline job
 
 ```bash
-# Run all tests
-go test ./...
-
-# Run with verbose output
-go test -v ./...
-
-# Run tests for a specific package
-go test ./internal/pipeline/...
-
-# Run with race detector
-go test -race ./...
-
-# Run load tests (10K–50K records, throughput benchmarks)
-go test -tags load -timeout 120s -v ./internal/pipeline/ -run TestLoad
-
-# Run real-world API tests (requires internet access; auto-skips if APIs are unreachable)
-go test -tags load -timeout 120s -v ./internal/pipeline/ -run TestRealWorld
+POST /api/v1/pipelines
+Content-Type: application/json
 ```
 
-## Configuration
-
-| Environment Variable | Description | Default |
-|---------------------|-------------|---------|
-| `PORT` | HTTP server listen port | `8080` |
-
-Source file paths and API URLs in job configurations can be overridden via environment variables.
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                              REST API (:8080)                                    │
-│   POST /api/v1/pipelines  GET /progress  GET /results  GET /errors  PATCH /cancel│
-└──────────────────────────────────────┬──────────────────────────────────────────┘
-                                       │
-┌──────────────────────────────────────▼──────────────────────────────────────────┐
-│                           Pipeline Engine                                        │
-│                                                                                  │
-│  ┌──────────┐    ┌──────────┐    ┌────────────┐    ┌──────────┐    ┌──────────┐ │
-│  │          │    │          │    │            │    │          │    │          │ │
-│  │ Ingester ├───►│Validator ├───►│Transformer ├───►│Aggregator├───►│ Exporter │ │
-│  │          │    │          │    │            │    │          │    │          │ │
-│  └────┬─────┘    └──────────┘    └────────────┘    └──────────┘    └────┬─────┘ │
-│       │         ch1 buf:100     ch2 buf:100      ch3 buf:100     ch4 buf:100    │
-│       │                                                                  │       │
-└───────┼──────────────────────────────────────────────────────────────────┼───────┘
-        │                                                                  │
-┌───────▼───────┐                                              ┌───────────▼──────┐
-│  Data Sources │                                              │  Export Targets   │
-│               │                                              │                   │
-│  • CSV Files  │                                              │  • SQLite DB      │
-│  • JSON Files │                                              │  • CSV Files      │
-│  • HTTP APIs  │                                              │  • JSON Files     │
-└───────────────┘                                              └───────────────────┘
-```
-
-**Data Flow:**
-
-```
-Data Sources → Ingester → [ch1 buf:100] → Validator → [ch2 buf:100] → Transformer → [ch3 buf:100] → Aggregator → [ch4 buf:100] → Exporter → Export Targets
-```
-
-Each stage runs as one or more goroutines with configurable worker pools (1–32 workers). Stages communicate through typed buffered channels (`chan *Record`, buffer size 100) providing back-pressure and decoupled processing rates.
-
-## API Examples
-
-### Create a Pipeline Job
-
-```bash
-curl -X POST http://localhost:8080/api/v1/pipelines \
-  -H "Content-Type: application/json" \
-  -d '{
-    "sources": [
-      {"type": "csv", "path": "./testdata/sample.csv"},
-      {"type": "json", "path": "./testdata/sample.json"}
-    ],
-    "validation": {
-      "fields": [
-        {"name": "amount", "type": "number", "required": true, "min": 0, "max": 1000000},
-        {"name": "email", "type": "string", "required": true, "pattern": "^[\\w.]+@[\\w.]+$"},
-        {"name": "name", "type": "string", "required": true}
-      ]
-    },
-    "transformations": [
-      {"field": "amount", "operation": "type_convert", "target_type": "number"},
-      {"field": "email", "operation": "lowercase"},
-      {"field": "name", "operation": "trim"}
-    ],
-    "aggregation": {
-      "group_by": ["category"],
-      "functions": [
-        {"name": "count", "field": "*", "alias": "total_count"},
-        {"name": "sum", "field": "amount", "alias": "total_amount"},
-        {"name": "average", "field": "amount", "alias": "avg_amount"}
-      ]
-    },
-    "exports": [
-      {"type": "sqlite", "path": "./results.db", "table_name": "aggregated_results"},
-      {"type": "csv", "path": "./results.csv"},
-      {"type": "json", "path": "./results.json"}
-    ],
-    "worker_pools": {
-      "ingester": 2,
-      "validator": 4,
-      "transformer": 4,
-      "aggregator": 1,
-      "exporter": 2
-    },
-    "timeout_seconds": 3600
-  }'
-```
-
-**Response (201 Created):**
+**Minimal valid body:**
 
 ```json
 {
-  "id": "job-a1b2c3d4",
-  "status": "queued",
-  "created_at": "2024-01-15T10:30:00Z"
-}
-```
-
-### List All Jobs
-
-```bash
-curl http://localhost:8080/api/v1/pipelines
-```
-
-**Response (200 OK):**
-
-```json
-{
-  "jobs": [
-    {"id": "job-a1b2c3d4", "status": "running", "created_at": "2024-01-15T10:30:00Z"},
-    {"id": "job-e5f6g7h8", "status": "completed", "created_at": "2024-01-15T09:00:00Z"}
+  "sources": [
+    {"type": "csv", "path": "./testdata/sample.csv"}
+  ],
+  "validation": {"fields": []},
+  "transformations": [],
+  "aggregation": {
+    "functions": [{"name": "count", "field": "*", "alias": "total"}]
+  },
+  "exports": [
+    {"type": "json", "path": "./output/results.json"}
   ]
 }
 ```
 
-### Get Job Details
-
-```bash
-curl http://localhost:8080/api/v1/pipelines/job-a1b2c3d4
-```
-
-**Response (200 OK):**
+**Full body with all options:**
 
 ```json
 {
-  "id": "job-a1b2c3d4",
-  "config": { "..." },
-  "status": "running",
-  "created_at": "2024-01-15T10:30:00Z",
-  "records_processed": 4500,
-  "records_pending": 500,
-  "percent_complete": 90
+  "sources": [
+    {"type": "csv",  "path": "./testdata/sample.csv"},
+    {"type": "json", "path": "./testdata/sample.json"},
+    {"type": "http", "path": "https://jsonplaceholder.typicode.com/posts", "timeout_seconds": 30}
+  ],
+  "validation": {
+    "fields": [
+      {"name": "amount",   "type": "number", "required": true, "min": 0, "max": 1000000},
+      {"name": "email",    "type": "string", "required": true, "pattern": "^[\\w.]+@[\\w.]+$"},
+      {"name": "name",     "type": "string", "required": true},
+      {"name": "date",     "type": "date",   "required": false},
+      {"name": "active",   "type": "boolean","required": false}
+    ]
+  },
+  "transformations": [
+    {"field": "amount",   "operation": "type_convert", "target_type": "number"},
+    {"field": "email",    "operation": "lowercase"},
+    {"field": "name",     "operation": "trim"}
+  ],
+  "aggregation": {
+    "group_by": ["category"],
+    "functions": [
+      {"name": "count",   "field": "*",      "alias": "total_count"},
+      {"name": "sum",     "field": "amount", "alias": "total_amount"},
+      {"name": "average", "field": "amount", "alias": "avg_amount"}
+    ]
+  },
+  "exports": [
+    {"type": "sqlite", "path": "./output/results.db", "table_name": "aggregated_results"},
+    {"type": "csv",    "path": "./output/results.csv"},
+    {"type": "json",   "path": "./output/results.json"}
+  ],
+  "worker_pools": {
+    "ingester":    2,
+    "validator":   4,
+    "transformer": 4,
+    "aggregator":  1,
+    "exporter":    2
+  },
+  "timeout_seconds": 3600
 }
 ```
 
-### Get Job Progress
+**Response `201 Created`:**
 
-```bash
-curl http://localhost:8080/api/v1/pipelines/job-a1b2c3d4/progress
+```json
+{"id": "a1b2c3d4-...", "status": "queued", "created_at": "2026-06-19T10:15:00Z"}
 ```
 
-**Response (200 OK):**
+**Validation error `400 Bad Request`:**
 
 ```json
 {
-  "records_processed": 4500,
-  "records_pending": 500,
-  "percent_complete": 90,
-  "processing_rate": 150.5,
+  "error": "invalid job configuration",
+  "details": [
+    {"field": "sources", "message": "at least one source is required"},
+    {"field": "aggregation.functions", "message": "at least one aggregation function is required"}
+  ]
+}
+```
+
+---
+
+### List all jobs
+
+```bash
+GET /api/v1/pipelines
+```
+
+```json
+{
+  "jobs": [
+    {"id": "a1b2c3d4", "status": "completed", "created_at": "2026-06-19T10:15:00Z"},
+    {"id": "e5f6g7h8", "status": "running",   "created_at": "2026-06-19T10:42:30Z"}
+  ]
+}
+```
+
+---
+
+### Get job details
+
+```bash
+GET /api/v1/pipelines/:id
+```
+
+```json
+{
+  "id": "a1b2c3d4",
+  "status": "running",
+  "created_at": "2026-06-19T10:15:00Z",
+  "records_processed": 42800,
+  "records_pending": 41431,
+  "percent_complete": 51,
+  "config": { "...full config..." }
+}
+```
+
+---
+
+### Get live progress & metrics
+
+```bash
+GET /api/v1/pipelines/:id/progress
+```
+
+```json
+{
+  "records_processed": 42800,
+  "records_pending":   41431,
+  "percent_complete":  51,
+  "processing_rate":   1420.5,
   "stage_latencies": {
-    "ingester": 2.1,
-    "validator": 1.5,
-    "transformer": 3.2,
-    "aggregator": 0.8,
-    "exporter": 5.0
+    "ingester":    2.1,
+    "validator":   0.8,
+    "transformer": 1.3,
+    "aggregator":  0.4,
+    "exporter":    3.7
   },
   "error_counts": {
-    "validator": 12,
-    "transformer": 3
+    "validator":   312,
+    "transformer": 14
   }
 }
 ```
 
-### Get Job Results
+`processing_rate` is records/second. `stage_latencies` is average ms per record per stage.
+
+---
+
+### Get results
+
+Available only after the job reaches `completed` status.
 
 ```bash
-curl http://localhost:8080/api/v1/pipelines/job-a1b2c3d4/results
+GET /api/v1/pipelines/:id/results
 ```
-
-**Response (200 OK):**
 
 ```json
 {
   "results": [
     {"category": "electronics", "total_count": 150, "total_amount": 45000.50, "avg_amount": 300.00},
-    {"category": "clothing", "total_count": 80, "total_amount": 12000.00, "avg_amount": 150.00}
+    {"category": "clothing",    "total_count": 80,  "total_amount": 12000.00, "avg_amount": 150.00}
   ],
   "metadata": {
-    "total_input_records": 5000,
+    "total_input_records":  5000,
     "total_output_records": 2,
-    "completed_at": "2024-01-15T10:45:00Z"
+    "completed_at":         "2026-06-19T10:16:02Z"
   }
 }
 ```
 
-### Get Job Errors (with Pagination)
+Returns `409 Conflict` if the job is still running, failed, or cancelled.
+
+---
+
+### Get errors (paginated)
 
 ```bash
-# Default pagination (offset=0, limit=50)
-curl http://localhost:8080/api/v1/pipelines/job-a1b2c3d4/errors
-
-# Custom pagination
-curl "http://localhost:8080/api/v1/pipelines/job-a1b2c3d4/errors?offset=10&limit=25"
+GET /api/v1/pipelines/:id/errors?offset=0&limit=50
 ```
-
-**Response (200 OK):**
 
 ```json
 {
   "errors": [
     {
-      "id": "err-001",
-      "stage": "validator",
-      "message": "field 'amount' failed numeric range check: value -5 is below minimum 0",
-      "record": {"name": "Test", "amount": "-5", "email": "test@example.com"},
-      "timestamp": "2024-01-15T10:31:05Z"
+      "id":        "err-001",
+      "job_id":    "a1b2c3d4",
+      "stage":     "validator",
+      "message":   "field 'amount' value -5 is below minimum 0",
+      "record":    {"name": "Alice", "amount": "-5", "email": "alice@example.com"},
+      "timestamp": "2026-06-19T10:15:03Z"
     }
   ],
-  "total": 15,
+  "total":  326,
   "offset": 0,
-  "limit": 50
+  "limit":  50
 }
 ```
 
-### Cancel a Running Job
+Default: `offset=0`, `limit=50`, max `limit=200`. The `total` field gives the full count across all pages.
+
+---
+
+### Cancel a running job
 
 ```bash
-curl -X PATCH http://localhost:8080/api/v1/pipelines/job-a1b2c3d4/cancel
+PATCH /api/v1/pipelines/:id/cancel
 ```
 
-**Response (202 Accepted):**
+```json
+{"id": "a1b2c3d4", "status": "cancelled", "message": "Cancellation initiated"}
+```
+
+Returns `409 Conflict` if the job is not currently running.
+
+---
+
+### Delete a job
+
+```bash
+DELETE /api/v1/pipelines/:id
+```
+
+Returns `204 No Content`. Returns `409 Conflict` if the job is currently running (cancel it first).
+
+---
+
+### Using the ready-made job configs
+
+The `testdata/job_configs/` directory contains five ready-to-use job specs:
+
+```bash
+# 200-record height/weight CSV from FSU (fast, good for smoke tests)
+curl -X POST http://localhost:8080/api/v1/pipelines \
+  -H "Content-Type: application/json" -d @testdata/job_configs/iris_csv.json
+
+# 300K+ row COVID-19 CSV from Our World in Data (large dataset test)
+curl -X POST http://localhost:8080/api/v1/pipelines \
+  -H "Content-Type: application/json" -d @testdata/job_configs/covid_csv.json
+
+# JSONPlaceholder posts API (100 records, group by userId)
+curl -X POST http://localhost:8080/api/v1/pipelines \
+  -H "Content-Type: application/json" -d @testdata/job_configs/jsonplaceholder_posts.json
+
+# JSONPlaceholder users API (10 records)
+curl -X POST http://localhost:8080/api/v1/pipelines \
+  -H "Content-Type: application/json" -d @testdata/job_configs/randomuser_api.json
+
+# Mixed-source Global Daily Report: CSV + 2 JSON APIs concurrently (800 total records)
+curl -X POST http://localhost:8080/api/v1/pipelines \
+  -H "Content-Type: application/json" -d @testdata/job_configs/global_daily_report.json
+```
+
+---
+
+## 6. Running on Different Dataset Sizes
+
+### Dataset size guide
+
+| Dataset size | Source | Worker pools | Timeout | Notes |
+|-------------|--------|--------------|---------|-------|
+| < 1K records | Local CSV/JSON | defaults (all 1) | 60s | No tuning needed |
+| 1K – 10K | Local or HTTP | validator: 2, transformer: 2 | 120s | Light parallelism |
+| 10K – 100K | Local files | validator: 4–8, transformer: 4–8 | 300s | Scale with CPU count |
+| 100K – 1M | Local files | validator: 8–16, transformer: 8–16 | 900s | Monitor back-pressure via `/metrics` |
+| 300K+ (streaming) | HTTP (e.g. COVID CSV) | validator: 4, transformer: 4 | 600s | Network is the bottleneck |
+
+### Generating synthetic test data
+
+```bash
+# 1K records with 5% invalid data (CSV)
+go run ./cmd/datagen -rows 1000 -format csv -output testdata/large/data_1k.csv
+
+# 10K records (JSON)
+go run ./cmd/datagen -rows 10000 -format json -output testdata/large/data_10k.json
+
+# 100K records, no invalid data
+go run ./cmd/datagen -rows 100000 -format csv -output testdata/large/data_100k.csv -invalid-pct 0
+
+# Reproducible dataset (fixed seed)
+go run ./cmd/datagen -rows 50000 -format csv -output testdata/large/data_50k.csv -seed 42
+```
+
+Generated records have these fields: `name`, `email`, `amount` (0–999.99), `date` (RFC3339), `category` (10 values), `active` (bool), `quantity` (1–100), `rating` (0.1–5.0).
+
+### Worker pool sizing rules
+
+```
+ingester    — one goroutine per source; set to the number of sources
+validator   — CPU-bound; set to runtime.NumCPU() or 2×NumCPU() for IO-heavy validation
+transformer — CPU-bound; same as validator
+aggregator  — always 1; it is a fan-in stage and must serialize writes
+exporter    — set to the number of export targets (1–3 typically)
+```
+
+Example job body for a 100K-record local CSV on an 8-core machine:
 
 ```json
 {
-  "id": "job-a1b2c3d4",
-  "status": "cancelled",
-  "message": "Cancellation initiated"
+  "sources": [{"type": "csv", "path": "./testdata/large/data_100k.csv"}],
+  "worker_pools": {
+    "ingester":    1,
+    "validator":   8,
+    "transformer": 8,
+    "aggregator":  1,
+    "exporter":    2
+  },
+  "timeout_seconds": 300
 }
 ```
 
-### Delete a Job
+### Monitoring throughput while running
+
+Poll the progress endpoint while a large job runs:
 
 ```bash
-curl -X DELETE http://localhost:8080/api/v1/pipelines/job-a1b2c3d4
+JOB_ID="<id from POST response>"
+
+watch -n 1 "curl -s http://localhost:8080/api/v1/pipelines/$JOB_ID/progress | \
+  python3 -m json.tool"
 ```
 
-**Response:** `204 No Content`
+Key fields to watch:
+- `processing_rate` — records/sec; if this drops, a downstream stage is a bottleneck
+- `stage_latencies.exporter` — if this is high, add more exporter workers or switch to a faster export target
+- `error_counts.validator` — if this spikes, your data has quality issues; inspect `/errors`
 
-## Real-World Data Sources
+---
 
-The pipeline supports CSV files fetched directly over HTTP (no local download needed). The following real-world sources are included as example job configurations in `testdata/job_configs/`:
+## 7. Prometheus Metrics
 
-### CSV over HTTP
+The server exposes a Prometheus-compatible `/metrics` endpoint. It uses a **private registry** (no global default metrics conflicts) and serves three metric families:
 
-| Source | URL | Records | Job Config |
-|--------|-----|---------|------------|
-| FSU Height/Weight | `https://people.sc.fsu.edu/~jburkardt/data/csv/hw_200.csv` | 200 | `iris_csv.json` |
-| Our World in Data COVID-19 | `https://covid.ourworldindata.org/data/owid-covid-data.csv` | 300K+ | `covid_csv.json` |
+1. **Pipeline-specific metrics** — collected live from the job store and progress tracker at each scrape
+2. **Go runtime metrics** — goroutine count, GC pauses, heap usage, etc.
+3. **Process metrics** — CPU time, open file descriptors, resident memory
 
-Use as a CSV source in your job config:
+### Scraping the endpoint
+
+```bash
+# One-shot: view all metrics in Prometheus text format
+curl http://localhost:8080/metrics
+
+# View only pipeline metrics
+curl -s http://localhost:8080/metrics | grep ^pipeline_
+```
+
+### Pipeline metric reference
+
+| Metric name | Type | Labels | Description |
+|-------------|------|--------|-------------|
+| `pipeline_jobs_total` | Gauge | `status` | Number of jobs in each status (queued / running / completed / failed / cancelled) |
+| `pipeline_records_processed_total` | Gauge | `job_id` | Records that completed all pipeline stages for this job |
+| `pipeline_records_pending` | Gauge | `job_id` | Records not yet fully processed |
+| `pipeline_percent_complete` | Gauge | `job_id` | Completion percentage 0–100 |
+| `pipeline_processing_rate_records_per_sec` | Gauge | `job_id` | Current throughput in records/second |
+| `pipeline_stage_latency_ms` | Gauge | `job_id`, `stage` | Average milliseconds per record at each stage |
+| `pipeline_stage_errors_total` | Gauge | `job_id`, `stage` | Total errors produced by each stage |
+
+### Example scrape output (with one running job)
+
+```
+# HELP pipeline_jobs_total Total number of pipeline jobs grouped by status.
+# TYPE pipeline_jobs_total gauge
+pipeline_jobs_total{status="cancelled"} 0
+pipeline_jobs_total{status="completed"} 2
+pipeline_jobs_total{status="failed"}    0
+pipeline_jobs_total{status="queued"}    0
+pipeline_jobs_total{status="running"}   1
+
+# HELP pipeline_records_processed_total Total number of records processed by a pipeline job.
+# TYPE pipeline_records_processed_total gauge
+pipeline_records_processed_total{job_id="a1b2c3d4"} 42800
+
+# HELP pipeline_records_pending Number of records still pending in a pipeline job.
+# TYPE pipeline_records_pending gauge
+pipeline_records_pending{job_id="a1b2c3d4"} 41431
+
+# HELP pipeline_percent_complete Completion percentage (0-100) of a pipeline job.
+# TYPE pipeline_percent_complete gauge
+pipeline_percent_complete{job_id="a1b2c3d4"} 51
+
+# HELP pipeline_processing_rate_records_per_sec Current processing rate in records per second.
+# TYPE pipeline_processing_rate_records_per_sec gauge
+pipeline_processing_rate_records_per_sec{job_id="a1b2c3d4"} 1420.5
+
+# HELP pipeline_stage_latency_ms Average latency in milliseconds per record for a pipeline stage.
+# TYPE pipeline_stage_latency_ms gauge
+pipeline_stage_latency_ms{job_id="a1b2c3d4",stage="aggregator"}  0.4
+pipeline_stage_latency_ms{job_id="a1b2c3d4",stage="exporter"}    3.7
+pipeline_stage_latency_ms{job_id="a1b2c3d4",stage="ingester"}    2.1
+pipeline_stage_latency_ms{job_id="a1b2c3d4",stage="transformer"} 1.3
+pipeline_stage_latency_ms{job_id="a1b2c3d4",stage="validator"}   0.8
+
+# HELP pipeline_stage_errors_total Total number of errors produced by a pipeline stage.
+# TYPE pipeline_stage_errors_total gauge
+pipeline_stage_errors_total{job_id="a1b2c3d4",stage="transformer"} 14
+pipeline_stage_errors_total{job_id="a1b2c3d4",stage="validator"}   312
+```
+
+### Configuring Prometheus to scrape this server
+
+Add this job to your `prometheus.yml`:
+
+```yaml
+scrape_configs:
+  - job_name: data-pipeline
+    static_configs:
+      - targets: ["localhost:8080"]
+    metrics_path: /metrics
+    scrape_interval: 5s
+```
+
+Then start Prometheus:
+
+```bash
+prometheus --config.file=prometheus.yml
+```
+
+Open `http://localhost:9090` and query:
+
+```promql
+# Throughput of all running jobs
+pipeline_processing_rate_records_per_sec
+
+# Error rate: validator errors as % of records processed
+rate(pipeline_stage_errors_total{stage="validator"}[1m])
+  / rate(pipeline_records_processed_total[1m])
+
+# Which stage is slowest?
+topk(1, pipeline_stage_latency_ms)
+```
+
+---
+
+## 8. PostgreSQL Export Target
+
+The `postgres` export type writes aggregated results to a PostgreSQL table. It uses the same `ExportTarget` interface as SQLite — the pipeline code is unaware of which database backs it.
+
+### How it works
+
+1. On first `Write`, the target issues `CREATE TABLE IF NOT EXISTS` with column types inferred from the result values (`TEXT`, `BIGINT`, `DOUBLE PRECISION`, `BOOLEAN`).
+2. All rows are inserted inside a single transaction using a prepared statement with `$N` placeholders (libpq style).
+3. Subsequent `Write` calls on the same table succeed because of `IF NOT EXISTS` — rows accumulate across calls.
+
+### Configuration
+
+Set `"type": "postgres"` in the exports array. The `"path"` field holds the connection string (DSN). `"table_name"` is the destination table (defaults to `"results"` if omitted).
+
 ```json
-{"type": "csv", "path": "https://people.sc.fsu.edu/~jburkardt/data/csv/hw_200.csv", "timeout_seconds": 30}
+{
+  "exports": [
+    {
+      "type":       "postgres",
+      "path":       "postgres://user:pass@localhost:5432/mydb?sslmode=disable",
+      "table_name": "pipeline_results"
+    }
+  ]
+}
 ```
 
-### JSON HTTP APIs (assignment-specified sources)
-
-| Purpose | Endpoint | Records |
-|---------|----------|---------|
-| Posts (group by userId) | `https://jsonplaceholder.typicode.com/posts` | 100 |
-| Comments (group by postId) | `https://jsonplaceholder.typicode.com/comments` | 500 |
-| Users | `https://jsonplaceholder.typicode.com/users` | 10 |
-| Products with categories | `https://dummyjson.com/products?limit=0` | 194 |
-
-### Mixed-Source "Global Daily Report" Example
-
-The `testdata/job_configs/global_daily_report.json` config demonstrates the assignment's mixed-source scenario: a CSV source over HTTP and two JSON API sources ingested concurrently (800 total records):
+If `"path"` is left blank, the server falls back to the `POSTGRES_DSN` environment variable:
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/pipelines \
-  -H "Content-Type: application/json" \
-  -d @testdata/job_configs/global_daily_report.json
+POSTGRES_DSN="postgres://user:pass@localhost:5432/mydb?sslmode=disable" go run ./cmd/server
 ```
 
-### Generating Large Test Data
+### DSN formats accepted by `lib/pq`
+
+```
+# URL format
+postgres://user:password@host:5432/dbname?sslmode=disable
+
+# Key-value format
+host=localhost port=5432 user=myuser password=mypass dbname=mydb sslmode=disable
+```
+
+### Combining export targets
+
+You can write to multiple targets in the same job. Results are written to all of them in parallel:
+
+```json
+{
+  "exports": [
+    {"type": "postgres", "path": "postgres://user:pass@localhost:5432/mydb?sslmode=disable", "table_name": "covid_summary"},
+    {"type": "sqlite",   "path": "./output/covid_summary.db",   "table_name": "covid_summary"},
+    {"type": "json",     "path": "./output/covid_summary.json"}
+  ]
+}
+```
+
+### Running the integration tests
+
+The PostgreSQL tests require a live database. Point `POSTGRES_DSN` at any reachable instance (local Docker, cloud, etc.) and run:
 
 ```bash
-# Generate 10K CSV records with ~5% invalid data
-go run ./cmd/datagen -rows 10000 -format csv -output testdata/large/my_data.csv
+# Start a local Postgres with Docker
+docker run -d --name pg-test \
+  -e POSTGRES_USER=pipeline \
+  -e POSTGRES_PASSWORD=pipeline \
+  -e POSTGRES_DB=pipeline \
+  -p 5432:5432 \
+  postgres:16-alpine
 
-# Generate 100K JSON records
-go run ./cmd/datagen -rows 100000 -format json -output testdata/large/my_data.json -invalid-pct 0
+# Run postgres tests only
+POSTGRES_DSN="postgres://pipeline:pipeline@localhost:5432/pipeline?sslmode=disable" \
+  go test -v ./internal/export/ -run TestPostgresTarget
+
+# Run the full test suite with postgres enabled
+POSTGRES_DSN="postgres://pipeline:pipeline@localhost:5432/pipeline?sslmode=disable" \
+  go test -race ./...
 ```
 
-## Design
+Tests that require `POSTGRES_DSN` are automatically **skipped** when the variable is not set, so the standard `go test ./...` command always passes without a database.
 
-See [DESIGN_REPORT.md](./DESIGN_REPORT.md) for the full design report (≤1 page) covering the concurrency model, worker pool sizing rationale, channel buffering strategy, and tradeoffs.
+---
 
-### Concurrency Model (summary)
-
-The pipeline uses Go's concurrency primitives to achieve parallel data processing:
-
-- **Goroutines**: Each pipeline stage runs as one or more goroutines. Worker pools within a stage use a fan-out/fan-in pattern where a distributor sends records to N workers, and a collector merges results into the output channel.
-
-- **Channels**: Stages are connected by typed buffered channels (`chan *Record`, buffer size 100). Channel buffering provides natural back-pressure — a slow downstream stage causes the upstream channel to fill, throttling the producer. Closing a channel signals end-of-stream to the next stage.
-
-- **Worker Pools**: Each stage supports 1–32 configurable workers. Workers process records concurrently within a stage, coordinated by `sync.WaitGroup`. The output channel is closed only after all workers complete, ensuring no data loss.
-
-- **Context Cancellation**: A `context.Context` propagates timeout and user-initiated cancellation to all goroutines. When cancelled, workers finish in-flight records (up to a 5-second grace period), then exit. This ensures clean shutdown without resource leaks.
-
-### Project Structure
+## 9. Project Structure
 
 ```
 data-pipeline/
-├── cmd/server/main.go          # Entry point, wires dependencies
+│
+├── cmd/
+│   ├── server/main.go          # Entry point — wires all dependencies and starts HTTP server
+│   └── datagen/main.go         # Synthetic dataset generator (CSV / JSON)
+│
 ├── internal/
-│   ├── api/                    # REST handlers, router, middleware
-│   ├── config/                 # Job configuration and validation
-│   ├── pipeline/               # Pipeline orchestrator and stages
-│   ├── model/                  # Core data types (Record, Job, Error, Progress)
-│   ├── store/                  # In-memory stores (jobs, errors, progress)
-│   └── export/                 # Export targets (SQLite, CSV, JSON)
-├── testdata/                   # Sample CSV and JSON files for testing
+│   ├── api/
+│   │   ├── router.go           # Route registration, middleware chain, Prometheus registry
+│   │   ├── handler.go          # CreateJob, ListJobs, GetJob, DeleteJob, GetProgress, GetResults
+│   │   ├── cancel_handler.go   # CancelJob — calls context.CancelFunc via sync.Map
+│   │   ├── errors_handler.go   # GetErrors — paginated error listing
+│   │   ├── results_handler.go  # InMemoryResultStore
+│   │   ├── metrics.go          # pipelineCollector — Prometheus custom Collector
+│   │   └── middleware.go       # LoggingMiddleware, RecoveryMiddleware
+│   │
+│   ├── config/
+│   │   ├── config.go           # ApplyEnvOverrides
+│   │   └── validate.go         # ValidateJobConfig — returns typed ValidationError slice
+│   │
+│   ├── pipeline/
+│   │   ├── pipeline.go         # Pipeline.Run — orchestrates stage goroutines
+│   │   ├── stage.go            # Stage interface
+│   │   ├── ingester.go         # Ingester — fan-out per source, merges into ch1
+│   │   ├── ingester_stage.go   # IngesterStage — wires Ingester into pipeline
+│   │   ├── validator.go        # Validator — schema checks, emits to errorCh on failure
+│   │   ├── transformer.go      # Transformer — type converts, trims, normalizes
+│   │   ├── aggregator.go       # Aggregator — group-by, count/sum/average
+│   │   ├── exporter.go         # Exporter — fans out to export targets
+│   │   ├── worker_pool.go      # Generic fan-out worker pool
+│   │   ├── source.go           # Source interface (CSVSource)
+│   │   ├── json_source.go      # JSONSource — reads JSON file or HTTP response
+│   │   └── http_source.go      # HTTPSource — fetches URL, parses JSON array
+│   │
+│   ├── model/
+│   │   ├── job.go              # Job, JobConfig, SourceConfig, ExportConfig, etc.
+│   │   ├── record.go           # Record (fields map + metadata)
+│   │   ├── progress.go         # Progress (counters, rates, latencies)
+│   │   └── error_entry.go      # ErrorEntry (stage, message, failed record)
+│   │
+│   ├── store/
+│   │   ├── job_store.go        # JobStore interface + InMemoryJobStore
+│   │   ├── error_store.go      # ErrorStore interface
+│   │   ├── error_store_impl.go # InMemoryErrorStore — append-only, per-job
+│   │   ├── progress_tracker.go # ProgressTracker interface
+│   │   └── progress_tracker_impl.go # Atomic counters, sliding-window rate
+│   │
+│   └── export/
+│       ├── target.go           # ExportTarget interface
+│       ├── sqlite.go           # SQLiteTarget — CGO, creates table dynamically
+│       ├── postgres.go         # PostgresTarget — lib/pq, $N placeholders, CREATE TABLE IF NOT EXISTS
+│       ├── csv.go              # CSVTarget — streams rows to file
+│       └── json.go             # JSONTarget — writes JSON array to file
+│
+├── testdata/
+│   ├── sample.csv              # Small sample for unit tests
+│   ├── sample.json             # Small sample for unit tests
+│   ├── job_configs/            # Ready-to-POST job specifications
+│   │   ├── covid_csv.json      # 300K+ record COVID-19 dataset
+│   │   ├── iris_csv.json       # 200-record height/weight CSV
+│   │   ├── jsonplaceholder_posts.json
+│   │   ├── randomuser_api.json
+│   │   └── global_daily_report.json  # Mixed CSV + 2 JSON APIs
+│   ├── api_responses/          # Example API response files (all endpoints)
+│   └── large/                  # Generated large datasets (gitignored)
+│
+├── DESIGN_REPORT.md            # ≤1 page design summary
 ├── go.mod
 └── go.sum
 ```
+
+---
+
+## 10. Testing
+
+```bash
+# Run all tests
+go test ./...
+
+# With race detector (recommended before committing)
+go test -race ./...
+
+# Verbose output for a specific package
+go test -v ./internal/pipeline/...
+
+# Load tests — runs pipelines on 1K and 10K synthetic records, asserts throughput
+go test -tags load -timeout 120s -v ./internal/pipeline/ -run TestLoad
+
+# Real-world API integration tests — fetches live data from JSONPlaceholder and FSU CSV
+# Auto-skips if the network is unreachable
+go test -tags load -timeout 120s -v ./internal/pipeline/ -run TestRealWorld
+
+# Property-based tests only
+go test -v ./... -run TestProperty
+```
+
+### What the tests cover
+
+| Test type | Location | What it verifies |
+|-----------|----------|------------------|
+| Unit tests | each `*_test.go` | Individual stage logic: parsing, validation rules, transform operations, aggregation math |
+| Integration tests | `pipeline_integration_test.go` | Full pipeline on sample data: correct output, error count, progress tracking |
+| Property-based tests | `*_property_test.go` | Invariants across random inputs (rapid): record conservation, no data races, channel closure |
+| Load tests | `load_test.go` | Throughput on 1K–10K records; asserts > 500 records/sec |
+| Real-world tests | `realworld_test.go` | Live pipeline runs against JSONPlaceholder and FSU CSV endpoints |
+| API handler tests | `internal/api/*_test.go` | HTTP handlers: correct status codes, response shapes, error paths |

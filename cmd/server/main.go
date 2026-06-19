@@ -202,6 +202,27 @@ func buildExportTargets(job *model.Job) ([]export.ExportTarget, []func()) {
 			targets = append(targets, export.NewCSVTarget(exp.Path))
 		case "json":
 			targets = append(targets, export.NewJSONTarget(exp.Path))
+		case "postgres":
+			tableName := exp.TableName
+			if tableName == "" {
+				tableName = "results"
+			}
+			// exp.Path holds the DSN; fall back to POSTGRES_DSN env var if blank.
+			dsn := exp.Path
+			if dsn == "" {
+				dsn = os.Getenv("POSTGRES_DSN")
+			}
+			if dsn == "" {
+				log.Printf("Skipping postgres export target: no DSN provided (set path or POSTGRES_DSN)")
+				continue
+			}
+			target, err := export.NewPostgresTarget(dsn, tableName)
+			if err != nil {
+				log.Printf("Failed to create postgres target: %v", err)
+				continue
+			}
+			targets = append(targets, target)
+			cleanups = append(cleanups, func() { target.Close() })
 		}
 	}
 	return targets, cleanups

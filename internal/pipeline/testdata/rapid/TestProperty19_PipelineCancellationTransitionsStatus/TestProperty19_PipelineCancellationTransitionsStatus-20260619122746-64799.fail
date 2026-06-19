@@ -1,0 +1,87 @@
+# 2026/06/19 12:27:46.283531 [TestProperty19_PipelineCancellationTransitionsStatus] [rapid] draw numRecords: 8
+# 2026/06/19 12:27:46.283541 [TestProperty19_PipelineCancellationTransitionsStatus] [rapid] draw validatorWorkers: 2
+# 2026/06/19 12:27:46.283544 [TestProperty19_PipelineCancellationTransitionsStatus] [rapid] draw transformerWorkers: 3
+# 2026/06/19 12:27:46.283547 [TestProperty19_PipelineCancellationTransitionsStatus] [rapid] draw numErrorRecords: 0
+# 2026/06/19 12:27:46.283550 [TestProperty19_PipelineCancellationTransitionsStatus] [rapid] draw cancelAfter: 1
+# 2026/06/19 12:27:46.283557 [TestProperty19_PipelineCancellationTransitionsStatus] [rapid] draw val_0: 352.47838795150165
+# 2026/06/19 12:27:46.283566 [TestProperty19_PipelineCancellationTransitionsStatus] [rapid] draw val_1: 8.122891989166502e-197
+# 2026/06/19 12:27:46.283571 [TestProperty19_PipelineCancellationTransitionsStatus] [rapid] draw val_2: 1.1113376686667223e-250
+# 2026/06/19 12:27:46.283575 [TestProperty19_PipelineCancellationTransitionsStatus] [rapid] draw val_3: 2.6011012681146894
+# 2026/06/19 12:27:46.283578 [TestProperty19_PipelineCancellationTransitionsStatus] [rapid] draw val_4: 0.8491295194671693
+# 2026/06/19 12:27:46.283581 [TestProperty19_PipelineCancellationTransitionsStatus] [rapid] draw val_5: 8.024404228875177e-115
+# 2026/06/19 12:27:46.283584 [TestProperty19_PipelineCancellationTransitionsStatus] [rapid] draw val_6: 0.5
+# 2026/06/19 12:27:46.283586 [TestProperty19_PipelineCancellationTransitionsStatus] [rapid] draw val_7: 0.10479068756103516
+# 
+v0.4.8#8202428319799562209
+0xaa70d5e7e35c5
+0x9c1950c676cdd
+0x3
+0xd33f145015a18
+0x9272cd8aa190c
+0x1
+0x1eb5315c4a4d2f
+0x1162edfa6d18a9
+0x2
+0x82c796386d78a
+0x115c63679ea5c5
+0x7
+0x0
+0x7aba2263c1542
+0x2345b8a259041
+0x0
+0xadd492665248
+0x60ef0dae062b0
+0x10111168c497de
+0x8
+0x60
+0x21
+0x7a77a1feda6
+0x15899f215b325b
+0x1c03702e8df1a6
+0x1601a1a47bad62
+0x28b
+0x0
+0x13
+0x849adb172a957
+0x1e9baf847c83a0
+0x1ef4b4c7fad582
+0x1afeb8f8a43d4b
+0x33e
+0x0
+0x19
+0x9764547e05493
+0xe864f649edbc4
+0x2dd0ed79f4590
+0x3672c244f2033
+0x1
+0x0
+0x2d
+0x4cf0e2e81183c
+0xbcffbe2e4b329
+0x142260e70d7898
+0x153dc3f5169c8
+0x0
+0x0
+0x26
+0xb2c11ab85ca73
+0x16c128b70a8c90
+0x1b1f1408ce92e7
+0x1a6a6a6db03af5
+0x17b
+0x0
+0x35
+0xf9e25af25fb3c
+0x80a1d35460079
+0x190afb18b5e8be
+0xba63cf4f22c3c
+0x0
+0x0
+0x0
+0xca84fffa1ab2c
+0x1c10c122f1f42b
+0x1f92b5fff43d55
+0x51cb9ccecb2c6
+0x3
+0x0
+0x15
+0xad3903e38ee71

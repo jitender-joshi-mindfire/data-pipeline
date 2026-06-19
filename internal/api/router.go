@@ -3,6 +3,9 @@ package api
 import (
 	"net/http"
 	"sync"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // PipelineRunner is the interface for starting pipeline job execution.
@@ -41,6 +44,15 @@ func NewRouter(h *Handler) http.Handler {
 	mux.HandleFunc("GET /api/v1/pipelines/{id}/results", h.GetResults)
 	mux.HandleFunc("GET /api/v1/pipelines/{id}/errors", h.GetErrors)
 	mux.HandleFunc("PATCH /api/v1/pipelines/{id}/cancel", h.CancelJob)
+
+	// Prometheus metrics endpoint
+	reg := prometheus.NewRegistry()
+	reg.MustRegister(
+		newPipelineCollector(h.JobStore, h.ProgressTracker),
+		prometheus.NewGoCollector(),
+		prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{}),
+	)
+	mux.Handle("GET /metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{}))
 
 	// Apply middleware: recovery wraps logging wraps the mux
 	var handler http.Handler = mux
