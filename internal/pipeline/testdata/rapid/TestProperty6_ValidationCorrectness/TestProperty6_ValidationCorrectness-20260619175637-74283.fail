@@ -1,0 +1,73 @@
+# 2026/06/19 17:56:37.943618 [TestProperty6_ValidationCorrectness] [rapid] draw numFields: 3
+# 2026/06/19 17:56:37.943624 [TestProperty6_ValidationCorrectness] [rapid] draw fieldName_0: "a0"
+# 2026/06/19 17:56:37.943626 [TestProperty6_ValidationCorrectness] [rapid] draw fieldType_0: "string"
+# 2026/06/19 17:56:37.943626 [TestProperty6_ValidationCorrectness] [rapid] draw required_0: false
+# 2026/06/19 17:56:37.943627 [TestProperty6_ValidationCorrectness] [rapid] draw hasPattern_0: false
+# 2026/06/19 17:56:37.943631 [TestProperty6_ValidationCorrectness] [rapid] draw fieldName_1: "a1"
+# 2026/06/19 17:56:37.943632 [TestProperty6_ValidationCorrectness] [rapid] draw fieldType_1: "string"
+# 2026/06/19 17:56:37.943632 [TestProperty6_ValidationCorrectness] [rapid] draw required_1: false
+# 2026/06/19 17:56:37.943633 [TestProperty6_ValidationCorrectness] [rapid] draw hasPattern_1: false
+# 2026/06/19 17:56:37.943634 [TestProperty6_ValidationCorrectness] [rapid] draw fieldName_2: "az"
+# 2026/06/19 17:56:37.943635 [TestProperty6_ValidationCorrectness] [rapid] draw fieldType_2: "string"
+# 2026/06/19 17:56:37.943635 [TestProperty6_ValidationCorrectness] [rapid] draw required_2: true
+# 2026/06/19 17:56:37.943651 [TestProperty6_ValidationCorrectness] [rapid] draw hasPattern_2: false
+# 2026/06/19 17:56:37.943653 [TestProperty6_ValidationCorrectness] [rapid] draw include_0: false
+# 2026/06/19 17:56:37.943653 [TestProperty6_ValidationCorrectness] [rapid] draw include_1: true
+# 2026/06/19 17:56:37.943654 [TestProperty6_ValidationCorrectness] [rapid] draw setNull_1: false
+# 2026/06/19 17:56:37.943655 [TestProperty6_ValidationCorrectness] [rapid] draw conforming_1: false
+# 2026/06/19 17:56:37.943657 [TestProperty6_ValidationCorrectness] [rapid] draw nonStr_1: 0
+# 2026/06/19 17:56:37.943658 [TestProperty6_ValidationCorrectness] [rapid] draw include_2: false
+# 2026/06/19 17:56:37.943665 [TestProperty6_ValidationCorrectness] expected 2 violation(s) logged, got 1
+# fields: map[a1:0]
+# schema: [{Name:a0 Type:string Required:false Min:<nil> Max:<nil> Pattern:} {Name:a1 Type:string Required:false Min:<nil> Max:<nil> Pattern:} {Name:az Type:string Required:true Min:<nil> Max:<nil> Pattern:}]
+# expected violations: [field 'a1' expected type string, got int field 'az' is required but missing or null]
+# actual errors: [field 'az' is required but missing or null]
+# 
+v0.4.8#12233944771648631653
+0x0
+0x38e38e38e38e4
+0x2
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x1
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x1f2b5a0e61c3a6
+0x0
+0x0
+0x0
+0x0
+0x1
+0x0
+0x0
+0x1
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0

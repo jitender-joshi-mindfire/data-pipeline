@@ -232,8 +232,8 @@ func TestJSONSource_SingleObjectInArray(t *testing.T) {
 
 	assert.Len(t, records, 1)
 	assert.Equal(t, "Alice", records[0].Fields["name"])
-	assert.Equal(t, float64(30), records[0].Fields["age"])
-	assert.Equal(t, true, records[0].Fields["active"])
+	assert.Equal(t, "30", records[0].Fields["age"])
+	assert.Equal(t, "true", records[0].Fields["active"])
 	assert.Equal(t, "json", records[0].Metadata.SourceType)
 	assert.Equal(t, filePath, records[0].Metadata.SourceID)
 	assert.Equal(t, 1, records[0].Metadata.LineNumber)
@@ -264,19 +264,19 @@ func TestJSONSource_MultiObjectArray(t *testing.T) {
 
 	assert.Len(t, records, 3)
 
-	assert.Equal(t, float64(1), records[0].Fields["id"])
+	assert.Equal(t, "1", records[0].Fields["id"])
 	assert.Equal(t, "Alice", records[0].Fields["name"])
-	assert.Equal(t, float64(95.5), records[0].Fields["score"])
+	assert.Equal(t, "95.5", records[0].Fields["score"])
 	assert.Equal(t, 1, records[0].Metadata.LineNumber)
 
-	assert.Equal(t, float64(2), records[1].Fields["id"])
+	assert.Equal(t, "2", records[1].Fields["id"])
 	assert.Equal(t, "Bob", records[1].Fields["name"])
-	assert.Equal(t, float64(87.3), records[1].Fields["score"])
+	assert.Equal(t, "87.3", records[1].Fields["score"])
 	assert.Equal(t, 2, records[1].Metadata.LineNumber)
 
-	assert.Equal(t, float64(3), records[2].Fields["id"])
+	assert.Equal(t, "3", records[2].Fields["id"])
 	assert.Equal(t, "Charlie", records[2].Fields["name"])
-	assert.Equal(t, float64(91.0), records[2].Fields["score"])
+	assert.Equal(t, "91", records[2].Fields["score"])
 	assert.Equal(t, 3, records[2].Metadata.LineNumber)
 
 	// Verify unique IDs

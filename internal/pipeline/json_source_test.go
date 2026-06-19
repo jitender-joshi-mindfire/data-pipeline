@@ -48,19 +48,19 @@ func TestJSONSource_ReadArray(t *testing.T) {
 
 	// Verify first record
 	assert.Equal(t, "Alice", records[0].Fields["name"])
-	assert.Equal(t, float64(30), records[0].Fields["age"])
+	assert.Equal(t, "30", records[0].Fields["age"])
 	assert.Equal(t, "json", records[0].Metadata.SourceType)
 	assert.Equal(t, filePath, records[0].Metadata.SourceID)
 	assert.Equal(t, 1, records[0].Metadata.LineNumber)
 
 	// Verify second record
 	assert.Equal(t, "Bob", records[1].Fields["name"])
-	assert.Equal(t, float64(25), records[1].Fields["age"])
+	assert.Equal(t, "25", records[1].Fields["age"])
 	assert.Equal(t, 2, records[1].Metadata.LineNumber)
 
 	// Verify third record
 	assert.Equal(t, "Charlie", records[2].Fields["name"])
-	assert.Equal(t, float64(35), records[2].Fields["age"])
+	assert.Equal(t, "35", records[2].Fields["age"])
 	assert.Equal(t, 3, records[2].Metadata.LineNumber)
 
 	// Verify unique IDs
@@ -94,7 +94,7 @@ func TestJSONSource_ReadNDJSON(t *testing.T) {
 
 	// Verify records
 	assert.Equal(t, "Alice", records[0].Fields["name"])
-	assert.Equal(t, float64(30), records[0].Fields["age"])
+	assert.Equal(t, "30", records[0].Fields["age"])
 	assert.Equal(t, "json", records[0].Metadata.SourceType)
 	assert.Equal(t, filePath, records[0].Metadata.SourceID)
 	assert.Equal(t, 1, records[0].Metadata.LineNumber)
@@ -203,7 +203,7 @@ func TestJSONSource_SingleObject(t *testing.T) {
 	assert.Len(t, records, 1)
 	assert.Equal(t, "Alice", records[0].Fields["name"])
 	assert.Equal(t, "alice@example.com", records[0].Fields["email"])
-	assert.Equal(t, true, records[0].Fields["active"])
+	assert.Equal(t, "true", records[0].Fields["active"])
 }
 
 func TestJSONSource_ImplementsSourceInterface(t *testing.T) {

@@ -93,7 +93,7 @@ func TestProperty13_ExportTargetIndependence(t *testing.T) {
 		stage := NewExporterStage("job-prop13", targets, errStore)
 
 		in := make(chan *model.Record, numRecords)
-		out := make(chan *model.Record)
+		out := make(chan *model.Record, numRecords+1) // buffered so exporter never blocks
 		for _, r := range records {
 			in <- r
 		}

@@ -81,7 +81,7 @@ func (h *HTTPSource) Read(ctx context.Context, out chan<- *model.Record) error {
 
 		record := &model.Record{
 			ID:     id,
-			Fields: obj,
+			Fields: stringifyFields(obj),
 			Metadata: model.RecordMetadata{
 				SourceType: "http",
 				SourceID:   h.URL,

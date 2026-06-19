@@ -41,13 +41,13 @@ func TestHTTPSource_Read_Success(t *testing.T) {
 	assert.Len(t, records, 2)
 
 	assert.Equal(t, "Alice", records[0].Fields["name"])
-	assert.Equal(t, float64(30), records[0].Fields["age"])
+	assert.Equal(t, "30", records[0].Fields["age"])
 	assert.Equal(t, "http", records[0].Metadata.SourceType)
 	assert.Equal(t, server.URL, records[0].Metadata.SourceID)
 	assert.Equal(t, 1, records[0].Metadata.LineNumber)
 
 	assert.Equal(t, "Bob", records[1].Fields["name"])
-	assert.Equal(t, float64(25), records[1].Fields["age"])
+	assert.Equal(t, "25", records[1].Fields["age"])
 	assert.Equal(t, "http", records[1].Metadata.SourceType)
 	assert.Equal(t, server.URL, records[1].Metadata.SourceID)
 	assert.Equal(t, 2, records[1].Metadata.LineNumber)

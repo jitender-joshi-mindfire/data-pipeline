@@ -213,8 +213,9 @@ func absDiff(a, b float64) float64 {
 // Validates: Requirements 6.5, 6.7
 //
 // For any record with a missing, null, or non-numeric value in a field targeted for
-// aggregation (or a missing/null group-by field), that record shall be excluded from
-// the aggregation computation and an error shall be logged to the Error_Store.
+// sum/average aggregation (or a missing/null group-by field), that record shall be
+// excluded from the numeric computation and an error shall be logged.
+// count(field) counts all non-null field values regardless of type (SQL standard behaviour).
 func TestProperty10_AggregationExcludesInvalidRecords(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
 		// Decide test scenario: invalid aggregation field vs invalid group-by field
@@ -235,6 +236,9 @@ func TestProperty10_AggregationExcludesInvalidRecords(t *testing.T) {
 		var allRecords []*model.Record
 		var validSum float64
 		validCount := 0
+		// count(field) counts non-null values regardless of type; track how many
+		// invalid records have the field present (not missing, not null)
+		numInvalidWithField := 0
 
 		for i := 0; i < numValid; i++ {
 			val := rapid.Float64Range(1, 1000).Draw(t, fmt.Sprintf("validVal_%d", i))
@@ -281,9 +285,11 @@ func TestProperty10_AggregationExcludesInvalidRecords(t *testing.T) {
 					// Null field
 					fields[aggField] = nil
 				case 2:
-					// Non-numeric field
+					// Non-numeric field — field is present with non-null value,
+					// so count(field) will include it even though sum/avg won't.
 					nonNumeric := rapid.StringMatching(`[a-zA-Z]{3,10}`).Draw(t, fmt.Sprintf("nonNumeric_%d", i))
 					fields[aggField] = nonNumeric
+					numInvalidWithField++
 				}
 			}
 
@@ -402,16 +408,27 @@ func TestProperty10_AggregationExcludesInvalidRecords(t *testing.T) {
 				t.Fatalf("total sum mismatch: expected %v, got %v (invalid agg field records should be excluded)",
 					validSum, totalSum)
 			}
-			if int(totalFieldCount) != validCount {
-				t.Fatalf("total field count mismatch: expected %d, got %v (invalid agg field records should be excluded)",
-					validCount, totalFieldCount)
+			// count(field) = numeric records + non-null non-numeric records
+			// (only missing/null records are excluded from count)
+			expectedFieldCount := validCount + numInvalidWithField
+			if int(totalFieldCount) != expectedFieldCount {
+				t.Fatalf("total field count mismatch: expected %d (valid=%d + non-null-invalid=%d), got %v",
+					expectedFieldCount, validCount, numInvalidWithField, totalFieldCount)
 			}
 		}
 
-		// Verify: errors are logged for each invalid record
+		// Verify: errors are logged for records that are invalid for sum/avg.
+		// count(field) no longer errors on non-numeric values — only missing/null trigger errors for count.
+		// sum/avg error on missing, null, and non-numeric. So min errors = numInvalid - numInvalidWithField
+		// (non-numeric records only produce errors for the sum and average functions, not count).
+		minExpectedErrors := numInvalid - numInvalidWithField // missing/null records → always errors
 		errors, totalErrors := errStore.GetByJob("prop10-job", 0, 200)
-		if totalErrors < numInvalid {
+		if !testGroupByInvalid && totalErrors < minExpectedErrors {
 			t.Fatalf("expected at least %d errors for invalid records, got %d total errors",
+				minExpectedErrors, totalErrors)
+		}
+		if testGroupByInvalid && totalErrors < numInvalid {
+			t.Fatalf("expected at least %d errors for invalid group-by records, got %d total errors",
 				numInvalid, totalErrors)
 		}
 

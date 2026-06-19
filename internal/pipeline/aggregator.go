@@ -192,15 +192,29 @@ func (a *Aggregator) computeAggregations(groupKey string, records []*model.Recor
 }
 
 // computeFunction computes a single aggregation function over the valid records in a group.
-// Records with missing/non-numeric values for the target field are excluded and errors logged.
+// - count: counts all records where the field exists (any value type is valid).
+// - sum / average: require numeric field values; non-numeric records are skipped and logged.
 func (a *Aggregator) computeFunction(fn model.AggregationFunction, records []*model.Record) float64 {
-	// For count with field "*", count all records in the group
+	// count("*") — count every record in the group unconditionally
 	if fn.Name == "count" && fn.Field == "*" {
 		return float64(len(records))
 	}
 
+	// count(field) — count records where the field exists, regardless of value type
+	if fn.Name == "count" {
+		var count int
+		for _, record := range records {
+			val, exists := record.Fields[fn.Field]
+			if exists && val != nil {
+				count++
+			}
+		}
+		return float64(count)
+	}
+
+	// sum / average — require numeric values
 	var sum float64
-	var count int
+	var numericCount int
 
 	for _, record := range records {
 		val, exists := record.Fields[fn.Field]
@@ -230,19 +244,17 @@ func (a *Aggregator) computeFunction(fn model.AggregationFunction, records []*mo
 		}
 
 		sum += numVal
-		count++
+		numericCount++
 	}
 
 	switch fn.Name {
-	case "count":
-		return float64(count)
 	case "sum":
 		return sum
 	case "average":
-		if count == 0 {
+		if numericCount == 0 {
 			return 0
 		}
-		return sum / float64(count)
+		return sum / float64(numericCount)
 	default:
 		return 0
 	}

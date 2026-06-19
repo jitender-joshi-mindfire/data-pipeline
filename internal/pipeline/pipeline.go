@@ -31,6 +31,12 @@ const (
 	maxTimeoutSeconds = 86400
 )
 
+// ResultStore is a minimal interface for persisting pipeline results so that the
+// GET /api/v1/pipelines/{id}/results endpoint can serve them after job completion.
+type ResultStore interface {
+	StoreResults(jobID string, results []map[string]interface{})
+}
+
 // Pipeline orchestrates the five-stage data processing pipeline.
 // It connects Ingester → Validator → Transformer → Aggregator → Exporter
 // with buffered channels, manages goroutine lifecycle, and transitions job status.
@@ -39,10 +45,11 @@ type Pipeline struct {
 	JobStore store.JobStore
 
 	// Stage dependencies
-	Sources      []Source
+	Sources       []Source
 	ExportTargets []export.ExportTarget
-	ErrStore     store.ErrorStore
-	Progress     store.ProgressTracker
+	ErrStore      store.ErrorStore
+	Progress      store.ProgressTracker
+	ResultStore   ResultStore // optional: populated after export for API results endpoint
 
 	// Worker pool configuration
 	ValidatorWorkers   int
@@ -220,9 +227,12 @@ func (p *Pipeline) Run(ctx context.Context) error {
 		}
 	}()
 
-	// Stage 5: Exporter (reads from aggregatorOut, writes to nil out channel)
-	// The exporter is the terminal stage; we use a dummy output channel.
+	// Stage 5: Exporter (reads from aggregatorOut, forwards exported records to exporterOut).
+	// exporterOut is drained below after wg.Wait() to populate the in-memory result store.
 	exporterOut := make(chan *model.Record, channelBufferSize)
+	var exportedRecords []*model.Record
+	var exportedMu sync.Mutex
+
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -231,6 +241,17 @@ func (p *Pipeline) Run(ctx context.Context) error {
 			if pipelineCtx.Err() == nil {
 				setFatal(fmt.Errorf("exporter: %w", err))
 			}
+		}
+	}()
+
+	// Drain exporterOut concurrently so the exporter is never blocked on sends.
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for r := range exporterOut {
+			exportedMu.Lock()
+			exportedRecords = append(exportedRecords, r)
+			exportedMu.Unlock()
 		}
 	}()
 
@@ -300,7 +321,18 @@ func (p *Pipeline) Run(ctx context.Context) error {
 		return ctx.Err()
 	}
 
-	// All stages completed successfully
+	// All stages completed successfully — populate the in-memory result store so
+	// GET /api/v1/pipelines/{id}/results can serve the aggregated output.
+	if p.ResultStore != nil {
+		exportedMu.Lock()
+		rows := make([]map[string]interface{}, 0, len(exportedRecords))
+		for _, r := range exportedRecords {
+			rows = append(rows, r.Fields)
+		}
+		exportedMu.Unlock()
+		p.ResultStore.StoreResults(p.Job.ID, rows)
+	}
+
 	_ = p.JobStore.UpdateStatus(p.Job.ID, model.StatusCompleted, "")
 	return nil
 }

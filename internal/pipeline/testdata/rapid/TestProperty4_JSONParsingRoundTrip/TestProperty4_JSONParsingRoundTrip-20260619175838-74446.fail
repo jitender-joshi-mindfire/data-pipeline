@@ -1,0 +1,33 @@
+# 2026/06/19 17:58:38.016837 [TestProperty4_JSONParsingRoundTrip] [rapid] draw numFields: 2
+# 2026/06/19 17:58:38.016842 [TestProperty4_JSONParsingRoundTrip] [rapid] draw fieldName_0: "A"
+# 2026/06/19 17:58:38.016843 [TestProperty4_JSONParsingRoundTrip] [rapid] draw fieldName_1: "B"
+# 2026/06/19 17:58:38.016844 [TestProperty4_JSONParsingRoundTrip] [rapid] draw numRows: 1
+# 2026/06/19 17:58:38.016845 [TestProperty4_JSONParsingRoundTrip] [rapid] draw valType_0_0: 0
+# 2026/06/19 17:58:38.016846 [TestProperty4_JSONParsingRoundTrip] [rapid] draw strVal_0_0: ""
+# 2026/06/19 17:58:38.016846 [TestProperty4_JSONParsingRoundTrip] [rapid] draw valType_1_0: 2
+# 2026/06/19 17:58:38.016847 [TestProperty4_JSONParsingRoundTrip] [rapid] draw boolVal_1_0: false
+# 2026/06/19 17:58:38.017029 [TestProperty4_JSONParsingRoundTrip] row 0: field "B" expected bool, got string
+# 
+v0.4.8#7775850838442755043
+0x0
+0x0
+0x1
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x1
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x1f2b5a0e61c3a6
+0x0
+0x0

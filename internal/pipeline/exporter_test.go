@@ -73,7 +73,7 @@ func TestExporterStage_WritesToAllTargets(t *testing.T) {
 	}
 
 	in := make(chan *model.Record, len(records))
-	out := make(chan *model.Record)
+	out := make(chan *model.Record, len(records)+1)
 	for _, r := range records {
 		in <- r
 	}
@@ -108,7 +108,7 @@ func TestExporterStage_FailureInOneTargetDoesNotPreventOthers(t *testing.T) {
 	}
 
 	in := make(chan *model.Record, len(records))
-	out := make(chan *model.Record)
+	out := make(chan *model.Record, len(records)+1)
 	for _, r := range records {
 		in <- r
 	}
@@ -136,7 +136,7 @@ func TestExporterStage_ErrorsLoggedToErrorStore(t *testing.T) {
 	}
 
 	in := make(chan *model.Record, len(records))
-	out := make(chan *model.Record)
+	out := make(chan *model.Record, len(records)+1)
 	for _, r := range records {
 		in <- r
 	}
@@ -208,7 +208,7 @@ func TestExporterStage_MultipleTargetFailures(t *testing.T) {
 	}
 
 	in := make(chan *model.Record, len(records))
-	out := make(chan *model.Record)
+	out := make(chan *model.Record, len(records)+1)
 	for _, r := range records {
 		in <- r
 	}

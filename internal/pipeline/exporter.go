@@ -73,5 +73,15 @@ export:
 		}
 	}
 
+	// Forward all records downstream so the pipeline can capture them for the
+	// in-memory result store (used by the GET /results API endpoint).
+	for _, r := range records {
+		select {
+		case out <- r:
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+	}
+
 	return nil
 }

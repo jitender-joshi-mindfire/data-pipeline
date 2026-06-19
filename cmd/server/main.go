@@ -129,6 +129,7 @@ func (r *pipelineRunner) RunJob(jobID string) {
 			r.errorStore,
 			r.progressTracker,
 		)
+		p.ResultStore = r.resultStore
 
 		// Create a cancellable context and store the cancel func for API cancellation
 		ctx, cancel := context.WithCancel(context.Background())

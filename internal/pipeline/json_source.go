@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 
 	"github.com/jitendraj/data-pipeline/internal/model"
 )
@@ -88,7 +89,7 @@ func (s *JSONSource) readArray(ctx context.Context, r io.Reader, out chan<- *mod
 
 		record := &model.Record{
 			ID:     id,
-			Fields: obj,
+			Fields: stringifyFields(obj),
 			Metadata: model.RecordMetadata{
 				SourceType: "json",
 				SourceID:   s.filePath,
@@ -146,7 +147,7 @@ func (s *JSONSource) readNDJSON(ctx context.Context, r io.Reader, out chan<- *mo
 
 		record := &model.Record{
 			ID:     id,
-			Fields: obj,
+			Fields: stringifyFields(obj),
 			Metadata: model.RecordMetadata{
 				SourceType: "json",
 				SourceID:   s.filePath,
@@ -166,6 +167,33 @@ func (s *JSONSource) readNDJSON(ctx context.Context, r io.Reader, out chan<- *mo
 	}
 
 	return nil
+}
+
+// stringifyFields converts all scalar JSON values to strings so that records
+// from JSON sources are consistent with CSV records (which are always strings).
+// This lets the validator apply the same type rules regardless of source type.
+func stringifyFields(obj map[string]interface{}) map[string]interface{} {
+	out := make(map[string]interface{}, len(obj))
+	for k, v := range obj {
+		switch val := v.(type) {
+		case string:
+			out[k] = val
+		case float64:
+			// Use strconv to avoid scientific notation for large integers
+			if val == float64(int64(val)) {
+				out[k] = strconv.FormatInt(int64(val), 10)
+			} else {
+				out[k] = strconv.FormatFloat(val, 'f', -1, 64)
+			}
+		case bool:
+			out[k] = strconv.FormatBool(val)
+		case nil:
+			out[k] = nil
+		default:
+			out[k] = fmt.Sprintf("%v", val)
+		}
+	}
+	return out
 }
 
 // generateRecordID generates a version 4 UUID string for record identification.

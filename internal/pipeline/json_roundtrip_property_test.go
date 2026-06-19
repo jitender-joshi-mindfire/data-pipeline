@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"testing"
 
 	"github.com/jitendraj/data-pipeline/internal/model"
@@ -132,35 +133,29 @@ func TestProperty4_JSONParsingRoundTrip(t *testing.T) {
 					t.Fatalf("row %d: missing field %q in parsed record", i, name)
 				}
 
-				// Compare values accounting for JSON round-trip behavior
-				// JSON numbers are always float64, booleans stay bool, strings stay string
+				// All values are stringified at ingestion time for consistency with CSV sources.
+				// Compare the string representation of the expected value with the actual string.
+				av, ok := actualValue.(string)
+				if !ok {
+					t.Fatalf("row %d: field %q expected string after ingestion, got %T", i, name, actualValue)
+				}
+				var expectedStr string
 				switch ev := expectedValue.(type) {
 				case string:
-					av, ok := actualValue.(string)
-					if !ok {
-						t.Fatalf("row %d: field %q expected string, got %T", i, name, actualValue)
-					}
-					if av != ev {
-						t.Fatalf("row %d: field %q value mismatch: expected %q, got %q", i, name, ev, av)
-					}
+					expectedStr = ev
 				case float64:
-					av, ok := actualValue.(float64)
-					if !ok {
-						t.Fatalf("row %d: field %q expected float64, got %T", i, name, actualValue)
-					}
-					if av != ev {
-						t.Fatalf("row %d: field %q value mismatch: expected %v, got %v", i, name, ev, av)
+					if ev == float64(int64(ev)) {
+						expectedStr = fmt.Sprintf("%d", int64(ev))
+					} else {
+						expectedStr = strconv.FormatFloat(ev, 'f', -1, 64)
 					}
 				case bool:
-					av, ok := actualValue.(bool)
-					if !ok {
-						t.Fatalf("row %d: field %q expected bool, got %T", i, name, actualValue)
-					}
-					if av != ev {
-						t.Fatalf("row %d: field %q value mismatch: expected %v, got %v", i, name, ev, av)
-					}
+					expectedStr = strconv.FormatBool(ev)
 				default:
 					t.Fatalf("row %d: field %q has unexpected type %T", i, name, expectedValue)
+				}
+				if av != expectedStr {
+					t.Fatalf("row %d: field %q value mismatch: expected %q, got %q", i, name, expectedStr, av)
 				}
 			}
 

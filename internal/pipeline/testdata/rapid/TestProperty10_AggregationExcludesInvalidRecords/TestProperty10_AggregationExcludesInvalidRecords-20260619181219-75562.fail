@@ -1,0 +1,53 @@
+# 2026/06/19 18:12:19.279990 [TestProperty10_AggregationExcludesInvalidRecords] [rapid] draw testGroupByInvalid: false
+# 2026/06/19 18:12:19.279994 [TestProperty10_AggregationExcludesInvalidRecords] [rapid] draw numValid: 1
+# 2026/06/19 18:12:19.279995 [TestProperty10_AggregationExcludesInvalidRecords] [rapid] draw numInvalid: 1
+# 2026/06/19 18:12:19.279996 [TestProperty10_AggregationExcludesInvalidRecords] [rapid] draw validVal_0: 1
+# 2026/06/19 18:12:19.279997 [TestProperty10_AggregationExcludesInvalidRecords] [rapid] draw validCat_0: 0
+# 2026/06/19 18:12:19.279998 [TestProperty10_AggregationExcludesInvalidRecords] [rapid] draw invalidType_0: 2
+# 2026/06/19 18:12:19.280002 [TestProperty10_AggregationExcludesInvalidRecords] [rapid] draw nonNumeric_0: "AAA"
+# 2026/06/19 18:12:19.280004 [TestProperty10_AggregationExcludesInvalidRecords] [rapid] draw shuffle: []int{0, 0}
+# 2026/06/19 18:12:19.280030 [TestProperty10_AggregationExcludesInvalidRecords] total field count mismatch: expected 1, got 2 (invalid agg field records should be excluded)
+# 
+v0.4.8#5846294167916383251
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x38e38e38e38e4
+0x2
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
