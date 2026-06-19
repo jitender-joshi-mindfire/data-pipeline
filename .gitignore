@@ -51,6 +51,11 @@ go.work.sum
 results.csv
 results.json
 
+# Large generated test data (regenerate with cmd/datagen)
+testdata/large/transactions_10k.*
+testdata/large/transactions_100k.*
+testdata/large/transactions_50k.*
+
 # OS files
 Thumbs.db
 

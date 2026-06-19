@@ -1,0 +1,58 @@
+[
+  {
+    "name": "Alice Johnson",
+    "email": "alice@example.com",
+    "amount": 250.50,
+    "date": "2024-01-15T10:30:00Z",
+    "category": "electronics",
+    "active": true
+  },
+  {
+    "name": "Bob Smith",
+    "email": "bob@example.com",
+    "amount": 75.00,
+    "date": "2024-01-16T14:20:00Z",
+    "category": "clothing",
+    "active": true
+  },
+  {
+    "name": "Charlie Brown",
+    "email": "charlie@example.com",
+    "amount": 1200.00,
+    "date": "2024-01-17T09:00:00Z",
+    "category": "electronics",
+    "active": false
+  },
+  {
+    "name": "Diana Prince",
+    "email": "diana@example.com",
+    "amount": 340.25,
+    "date": "2024-02-01T16:45:00Z",
+    "category": "food",
+    "active": true
+  },
+  {
+    "name": "Eve Williams",
+    "email": "eve@example.com",
+    "amount": 89.99,
+    "date": "2024-02-02T11:15:00Z",
+    "category": "clothing",
+    "active": true
+  },
+  {
+    "name": "Frank Miller",
+    "email": "frank@example.com",
+    "amount": 500.00,
+    "date": "2024-02-10T08:30:00Z",
+    "category": "food",
+    "active": false
+  },
+  {
+    "name": "Grace Lee",
+    "email": "grace@example.com",
+    "amount": 150.75,
+    "date": "2024-03-01T13:00:00Z",
+    "category": "electronics",
+    "active": true
+  }
+]
