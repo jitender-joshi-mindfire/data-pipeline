@@ -122,6 +122,11 @@ func (s *InMemoryJobStore) UpdateStatus(id string, status model.JobStatus, errMs
 		return ErrJobNotFound
 	}
 
+	// Prevent transitioning out of a terminal state.
+	if job.Status == model.StatusCompleted || job.Status == model.StatusFailed || job.Status == model.StatusCancelled {
+		return nil
+	}
+
 	job.Status = status
 	job.Error = errMsg
 
