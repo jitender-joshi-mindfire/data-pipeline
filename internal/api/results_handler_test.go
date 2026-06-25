@@ -32,6 +32,10 @@ func (m *mockResultStore) StoreResults(jobID string, results []map[string]interf
 	m.results[jobID] = results
 }
 
+func (m *mockResultStore) DeleteResults(jobID string) {
+	delete(m.results, jobID)
+}
+
 // --- Tests ---
 
 func TestGetResults_CompletedJob_ReturnsResults(t *testing.T) {

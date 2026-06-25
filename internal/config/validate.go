@@ -39,9 +39,10 @@ var validSourceTypes = map[string]bool{
 
 // validExportTypes defines the allowed export types.
 var validExportTypes = map[string]bool{
-	"sqlite": true,
-	"csv":    true,
-	"json":   true,
+	"sqlite":   true,
+	"csv":      true,
+	"json":     true,
+	"postgres": true,
 }
 
 func validateSources(sources []model.SourceConfig) []ValidationError {

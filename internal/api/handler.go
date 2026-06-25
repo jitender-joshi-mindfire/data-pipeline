@@ -33,6 +33,7 @@ type ProgressTracker interface {
 type ResultStore interface {
 	GetResults(jobID string) ([]map[string]interface{}, bool)
 	StoreResults(jobID string, results []map[string]interface{})
+	DeleteResults(jobID string)
 }
 
 // createJobResponse is the response body for POST /api/v1/pipelines.
@@ -212,6 +213,9 @@ func (h *Handler) DeleteJob(w http.ResponseWriter, r *http.Request) {
 	// Clean up associated data
 	if h.ErrorStore != nil {
 		h.ErrorStore.DeleteByJob(id)
+	}
+	if h.ResultStore != nil {
+		h.ResultStore.DeleteResults(id)
 	}
 
 	w.WriteHeader(http.StatusNoContent)
