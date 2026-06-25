@@ -1,13 +1,13 @@
 package store
 
 import (
-	"crypto/rand"
 	"errors"
 	"fmt"
 	"sync"
 	"time"
 
 	"github.com/jitendraj/data-pipeline/internal/model"
+	"github.com/jitendraj/data-pipeline/internal/uid"
 )
 
 // Errors returned by JobStore operations.
@@ -138,19 +138,4 @@ func (s *InMemoryJobStore) UpdateStatus(id string, status model.JobStatus, errMs
 	return nil
 }
 
-// generateUUID generates a version 4 UUID string.
-func generateUUID() (string, error) {
-	var uuid [16]byte
-	_, err := rand.Read(uuid[:])
-	if err != nil {
-		return "", err
-	}
-
-	// Set version 4 bits
-	uuid[6] = (uuid[6] & 0x0f) | 0x40
-	// Set variant bits
-	uuid[8] = (uuid[8] & 0x3f) | 0x80
-
-	return fmt.Sprintf("%08x-%04x-%04x-%04x-%012x",
-		uuid[0:4], uuid[4:6], uuid[6:8], uuid[8:10], uuid[10:16]), nil
-}
+func generateUUID() (string, error) { return uid.New() }
