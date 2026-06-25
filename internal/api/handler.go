@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/jitendraj/data-pipeline/internal/config"
@@ -69,6 +70,23 @@ type getJobResponse struct {
 // errorResponse is a generic error response body.
 type errorResponse struct {
 	Error string `json:"error"`
+}
+
+// redactConfig returns a copy of cfg with database passwords removed from
+// postgres DSN paths so credentials are never returned via the API.
+func redactConfig(cfg model.JobConfig) model.JobConfig {
+	exports := make([]model.ExportConfig, len(cfg.Exports))
+	copy(exports, cfg.Exports)
+	for i, exp := range exports {
+		if exp.Type == "postgres" && exp.Path != "" {
+			if u, err := url.Parse(exp.Path); err == nil && u.User != nil {
+				u.User = url.User(u.User.Username())
+				exports[i].Path = u.String()
+			}
+		}
+	}
+	cfg.Exports = exports
+	return cfg
 }
 
 // resultsResponseBody is the response body for GET /api/v1/pipelines/:id/results.
@@ -177,7 +195,7 @@ func (h *Handler) GetJob(w http.ResponseWriter, r *http.Request) {
 
 	writeJSON(w, http.StatusOK, getJobResponse{
 		ID:               job.ID,
-		Config:           job.Config,
+		Config:           redactConfig(job.Config),
 		Status:           string(job.Status),
 		CreatedAt:        job.CreatedAt,
 		RecordsProcessed: recordsProcessed,

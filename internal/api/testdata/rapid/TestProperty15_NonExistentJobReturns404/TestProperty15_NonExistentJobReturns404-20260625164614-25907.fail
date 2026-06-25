@@ -1,0 +1,95 @@
+# 2026/06/25 16:46:14.043925 [TestProperty15_NonExistentJobReturns404] [rapid] draw uuid-a: 0x144
+# 2026/06/25 16:46:14.043927 [TestProperty15_NonExistentJobReturns404] [rapid] draw uuid-b: 0xa75e
+# 2026/06/25 16:46:14.043928 [TestProperty15_NonExistentJobReturns404] [rapid] draw uuid-c: 0x2310
+# 2026/06/25 16:46:14.043929 [TestProperty15_NonExistentJobReturns404] [rapid] draw uuid-d: 0x46a4
+# 2026/06/25 16:46:14.043929 [TestProperty15_NonExistentJobReturns404] [rapid] draw uuid-e: 0x96d5b2
+# 2026/06/25 16:46:14.043959 [TestProperty15_NonExistentJobReturns404] 
+# 	Error Trace:	/Users/jitendraj/my-apps/data-pipeline/internal/api/handler_property_test.go:64
+# 	            				/Users/jitendraj/go/pkg/mod/pgregory.net/rapid@v1.3.0/engine.go:458
+# 	            				/Users/jitendraj/go/pkg/mod/pgregory.net/rapid@v1.3.0/engine.go:467
+# 	            				/Users/jitendraj/go/pkg/mod/pgregory.net/rapid@v1.3.0/engine.go:292
+# 	            				/Users/jitendraj/go/pkg/mod/pgregory.net/rapid@v1.3.0/engine.go:207
+# 	            				/Users/jitendraj/my-apps/data-pipeline/internal/api/handler_property_test.go:35
+# 	            				/opt/homebrew/Cellar/go/1.26.4/libexec/src/runtime/asm_arm64.s:1447
+# 	Error:      	Not equal: 
+# 	            	expected: 404
+# 	            	actual  : 429
+# 	Test:       	TestProperty15_NonExistentJobReturns404
+# 	Messages:   	Expected 404 for GET /api/v1/pipelines/00000144-a75e-2310-46a4-00000096d5b2 with non-existent ID 00000144-a75e-2310-46a4-00000096d5b2, got 429
+# 2026/06/25 16:46:14.043992 [TestProperty15_NonExistentJobReturns404] 
+# 	Error Trace:	/Users/jitendraj/my-apps/data-pipeline/internal/api/handler_property_test.go:64
+# 	            				/Users/jitendraj/go/pkg/mod/pgregory.net/rapid@v1.3.0/engine.go:458
+# 	            				/Users/jitendraj/go/pkg/mod/pgregory.net/rapid@v1.3.0/engine.go:467
+# 	            				/Users/jitendraj/go/pkg/mod/pgregory.net/rapid@v1.3.0/engine.go:292
+# 	            				/Users/jitendraj/go/pkg/mod/pgregory.net/rapid@v1.3.0/engine.go:207
+# 	            				/Users/jitendraj/my-apps/data-pipeline/internal/api/handler_property_test.go:35
+# 	            				/opt/homebrew/Cellar/go/1.26.4/libexec/src/runtime/asm_arm64.s:1447
+# 	Error:      	Not equal: 
+# 	            	expected: 404
+# 	            	actual  : 429
+# 	Test:       	TestProperty15_NonExistentJobReturns404
+# 	Messages:   	Expected 404 for GET /api/v1/pipelines/00000144-a75e-2310-46a4-00000096d5b2/progress with non-existent ID 00000144-a75e-2310-46a4-00000096d5b2, got 429
+# 2026/06/25 16:46:14.044207 [TestProperty15_NonExistentJobReturns404] 
+# 	Error Trace:	/Users/jitendraj/my-apps/data-pipeline/internal/api/handler_property_test.go:64
+# 	            				/Users/jitendraj/go/pkg/mod/pgregory.net/rapid@v1.3.0/engine.go:458
+# 	            				/Users/jitendraj/go/pkg/mod/pgregory.net/rapid@v1.3.0/engine.go:467
+# 	            				/Users/jitendraj/go/pkg/mod/pgregory.net/rapid@v1.3.0/engine.go:292
+# 	            				/Users/jitendraj/go/pkg/mod/pgregory.net/rapid@v1.3.0/engine.go:207
+# 	            				/Users/jitendraj/my-apps/data-pipeline/internal/api/handler_property_test.go:35
+# 	            				/opt/homebrew/Cellar/go/1.26.4/libexec/src/runtime/asm_arm64.s:1447
+# 	Error:      	Not equal: 
+# 	            	expected: 404
+# 	            	actual  : 429
+# 	Test:       	TestProperty15_NonExistentJobReturns404
+# 	Messages:   	Expected 404 for GET /api/v1/pipelines/00000144-a75e-2310-46a4-00000096d5b2/results with non-existent ID 00000144-a75e-2310-46a4-00000096d5b2, got 429
+# 2026/06/25 16:46:14.044280 [TestProperty15_NonExistentJobReturns404] 
+# 	Error Trace:	/Users/jitendraj/my-apps/data-pipeline/internal/api/handler_property_test.go:64
+# 	            				/Users/jitendraj/go/pkg/mod/pgregory.net/rapid@v1.3.0/engine.go:458
+# 	            				/Users/jitendraj/go/pkg/mod/pgregory.net/rapid@v1.3.0/engine.go:467
+# 	            				/Users/jitendraj/go/pkg/mod/pgregory.net/rapid@v1.3.0/engine.go:292
+# 	            				/Users/jitendraj/go/pkg/mod/pgregory.net/rapid@v1.3.0/engine.go:207
+# 	            				/Users/jitendraj/my-apps/data-pipeline/internal/api/handler_property_test.go:35
+# 	            				/opt/homebrew/Cellar/go/1.26.4/libexec/src/runtime/asm_arm64.s:1447
+# 	Error:      	Not equal: 
+# 	            	expected: 404
+# 	            	actual  : 429
+# 	Test:       	TestProperty15_NonExistentJobReturns404
+# 	Messages:   	Expected 404 for GET /api/v1/pipelines/00000144-a75e-2310-46a4-00000096d5b2/errors with non-existent ID 00000144-a75e-2310-46a4-00000096d5b2, got 429
+# 2026/06/25 16:46:14.044326 [TestProperty15_NonExistentJobReturns404] 
+# 	Error Trace:	/Users/jitendraj/my-apps/data-pipeline/internal/api/handler_property_test.go:64
+# 	            				/Users/jitendraj/go/pkg/mod/pgregory.net/rapid@v1.3.0/engine.go:458
+# 	            				/Users/jitendraj/go/pkg/mod/pgregory.net/rapid@v1.3.0/engine.go:467
+# 	            				/Users/jitendraj/go/pkg/mod/pgregory.net/rapid@v1.3.0/engine.go:292
+# 	            				/Users/jitendraj/go/pkg/mod/pgregory.net/rapid@v1.3.0/engine.go:207
+# 	            				/Users/jitendraj/my-apps/data-pipeline/internal/api/handler_property_test.go:35
+# 	            				/opt/homebrew/Cellar/go/1.26.4/libexec/src/runtime/asm_arm64.s:1447
+# 	Error:      	Not equal: 
+# 	            	expected: 404
+# 	            	actual  : 429
+# 	Test:       	TestProperty15_NonExistentJobReturns404
+# 	Messages:   	Expected 404 for PATCH /api/v1/pipelines/00000144-a75e-2310-46a4-00000096d5b2/cancel with non-existent ID 00000144-a75e-2310-46a4-00000096d5b2, got 429
+# 2026/06/25 16:46:14.044589 [TestProperty15_NonExistentJobReturns404] 
+# 	Error Trace:	/Users/jitendraj/my-apps/data-pipeline/internal/api/handler_property_test.go:64
+# 	            				/Users/jitendraj/go/pkg/mod/pgregory.net/rapid@v1.3.0/engine.go:458
+# 	            				/Users/jitendraj/go/pkg/mod/pgregory.net/rapid@v1.3.0/engine.go:467
+# 	            				/Users/jitendraj/go/pkg/mod/pgregory.net/rapid@v1.3.0/engine.go:292
+# 	            				/Users/jitendraj/go/pkg/mod/pgregory.net/rapid@v1.3.0/engine.go:207
+# 	            				/Users/jitendraj/my-apps/data-pipeline/internal/api/handler_property_test.go:35
+# 	            				/opt/homebrew/Cellar/go/1.26.4/libexec/src/runtime/asm_arm64.s:1447
+# 	Error:      	Not equal: 
+# 	            	expected: 404
+# 	            	actual  : 429
+# 	Test:       	TestProperty15_NonExistentJobReturns404
+# 	Messages:   	Expected 404 for DELETE /api/v1/pipelines/00000144-a75e-2310-46a4-00000096d5b2 with non-existent ID 00000144-a75e-2310-46a4-00000096d5b2, got 429
+# 
+v0.4.8#17388124531617291611
+0x111d476c2e3d8f
+0x144
+0x1da7917786bc01
+0xa75e
+0x1da3360d5c944f
+0x2310
+0x19fec9c753c80c
+0x46a4
+0x18a1bb1052a68e
+0x96d5b2

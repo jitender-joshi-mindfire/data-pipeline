@@ -30,7 +30,7 @@ func TestProperty15_NonExistentJobReturns404(t *testing.T) {
 		ResultStore:     rs,
 	}
 
-	router := NewRouter(h)
+	router := NewRouterWithLimiter(h, nil)
 
 	rapid.Check(t, func(t *rapid.T) {
 		// Generate a random UUID-like string that is guaranteed to not be in the store.
