@@ -17,7 +17,7 @@ func TestNewRouter_RoutesRegistered(t *testing.T) {
 		ErrorStore:      es,
 		ProgressTracker: pt,
 	}
-	router := NewRouter(h)
+	router := NewRouterWithLimiter(h, nil)
 
 	tests := []struct {
 		method string
@@ -51,7 +51,7 @@ func TestNewRouter_UnknownRoute_Returns404(t *testing.T) {
 		ErrorStore:      newMockErrorStore(),
 		ProgressTracker: newMockProgressTracker(),
 	}
-	router := NewRouter(h)
+	router := NewRouterWithLimiter(h, nil)
 
 	req := httptest.NewRequest("GET", "/api/v1/unknown", nil)
 	w := httptest.NewRecorder()

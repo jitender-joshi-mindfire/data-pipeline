@@ -28,9 +28,16 @@ type Handler struct {
 	CancelFuncs sync.Map
 }
 
-// NewRouter creates an http.Handler with all API routes registered.
-// It wraps the mux with logging and panic recovery middleware.
+// NewRouter creates an http.Handler with all API routes registered using the
+// default production rate limiter. Use NewRouterWithLimiter(h, nil) in tests
+// to disable rate limiting.
 func NewRouter(h *Handler) http.Handler {
+	return NewRouterWithLimiter(h, DefaultRateLimiter)
+}
+
+// NewRouterWithLimiter is like NewRouter but accepts an explicit rate limiter.
+// Pass nil to disable rate limiting (e.g. in tests).
+func NewRouterWithLimiter(h *Handler, limiter *ipRateLimiter) http.Handler {
 	mux := http.NewServeMux()
 
 	// Job lifecycle endpoints
@@ -54,9 +61,11 @@ func NewRouter(h *Handler) http.Handler {
 	)
 	mux.Handle("GET /metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{}))
 
-	// Apply middleware: recovery wraps logging wraps the mux
+	// Apply middleware (outermost first): recovery → rate-limit → CORS → logging → mux
 	var handler http.Handler = mux
 	handler = LoggingMiddleware(handler)
+	handler = CORSMiddleware(handler)
+	handler = RateLimitMiddleware(limiter, handler)
 	handler = RecoveryMiddleware(handler)
 
 	return handler

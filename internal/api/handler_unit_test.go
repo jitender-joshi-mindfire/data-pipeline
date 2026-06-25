@@ -23,7 +23,7 @@ func TestRouter_MethodNotAllowed(t *testing.T) {
 		ErrorStore:      newMockErrorStore(),
 		ProgressTracker: newMockProgressTracker(),
 	}
-	router := NewRouter(h)
+	router := NewRouterWithLimiter(h, nil)
 
 	tests := []struct {
 		name   string
@@ -106,7 +106,7 @@ func TestRouter_CorrectStatusCodes(t *testing.T) {
 		ProgressTracker: pt,
 		ResultStore:     rs,
 	}
-	router := NewRouter(h)
+	router := NewRouterWithLimiter(h, nil)
 
 	tests := []struct {
 		name       string
