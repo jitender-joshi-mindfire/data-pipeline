@@ -197,6 +197,7 @@ func buildExportTargets(job *model.Job) ([]export.ExportTarget, []func()) {
 				log.Printf("Failed to create SQLite target %s: %v", exp.Path, err)
 				continue
 			}
+			target.SetSchema(exp.Schema)
 			targets = append(targets, target)
 			cleanups = append(cleanups, func() { target.Close() })
 		case "csv":
@@ -222,6 +223,7 @@ func buildExportTargets(job *model.Job) ([]export.ExportTarget, []func()) {
 				log.Printf("Failed to create postgres target: %v", err)
 				continue
 			}
+			target.SetSchema(exp.Schema)
 			targets = append(targets, target)
 			cleanups = append(cleanups, func() { target.Close() })
 		}

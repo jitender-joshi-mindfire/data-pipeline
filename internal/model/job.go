@@ -79,9 +79,10 @@ type AggregationFunction struct {
 
 // ExportConfig defines an export target for results
 type ExportConfig struct {
-	Type      string `json:"type"`                 // "sqlite", "postgres", "csv", "json"
-	Path      string `json:"path"`                 // File path, SQLite path, or Postgres DSN
-	TableName string `json:"table_name,omitempty"` // For SQLite and Postgres
+	Type      string            `json:"type"`                 // "sqlite", "postgres", "csv", "json"
+	Path      string            `json:"path"`                 // File path, SQLite path, or Postgres DSN
+	TableName string            `json:"table_name,omitempty"` // For SQLite and Postgres
+	Schema    map[string]string `json:"schema,omitempty"`     // Optional explicit column types, e.g. {"amount": "REAL"}
 }
 
 // WorkerPoolConfig defines the number of workers per pipeline stage

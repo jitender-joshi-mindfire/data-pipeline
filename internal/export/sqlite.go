@@ -20,6 +20,7 @@ type SQLiteTarget struct {
 	dbPath    string
 	tableName string
 	db        *sql.DB
+	schema    map[string]string // optional explicit column → SQLite type overrides
 }
 
 // NewSQLiteTarget creates a new SQLiteTarget with the given database path and table name.
@@ -154,8 +155,20 @@ func (s *SQLiteTarget) createTable(ctx context.Context, columns []string, result
 	return err
 }
 
-// inferColumnType determines the SQLite column type based on the field values across all records.
+// SetSchema sets explicit column type overrides, bypassing inference for named columns.
+func (s *SQLiteTarget) SetSchema(schema map[string]string) {
+	s.schema = schema
+}
+
+// inferColumnType determines the SQLite column type for a column. If an explicit
+// type is provided in the schema override, it is used directly; otherwise the
+// type is inferred from the first non-nil value across all records.
 func (s *SQLiteTarget) inferColumnType(column string, results []*model.Record) string {
+	if s.schema != nil {
+		if t, ok := s.schema[column]; ok && t != "" {
+			return strings.ToUpper(t)
+		}
+	}
 	for _, record := range results {
 		val, ok := record.Fields[column]
 		if !ok || val == nil {
