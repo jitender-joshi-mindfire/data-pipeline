@@ -20,6 +20,7 @@ type PostgresTarget struct {
 	dsn       string
 	tableName string
 	db        *sql.DB
+	schema    map[string]string // optional explicit column → PostgreSQL type overrides
 }
 
 // NewPostgresTarget opens a connection to the PostgreSQL database at dsn and
@@ -151,9 +152,20 @@ func (p *PostgresTarget) createTable(ctx context.Context, columns []string, resu
 	return err
 }
 
-// inferColumnType maps Go value types to PostgreSQL column types.
-// It scans all records for the first non-nil value of the column.
+// SetSchema sets explicit column type overrides, bypassing inference for named columns.
+func (p *PostgresTarget) SetSchema(schema map[string]string) {
+	p.schema = schema
+}
+
+// inferColumnType maps a column to its PostgreSQL type. If an explicit type is
+// provided in the schema override, it is used directly; otherwise the type is
+// inferred from the first non-nil value across all records.
 func (p *PostgresTarget) inferColumnType(column string, results []*model.Record) string {
+	if p.schema != nil {
+		if t, ok := p.schema[column]; ok && t != "" {
+			return strings.ToUpper(t)
+		}
+	}
 	for _, r := range results {
 		v, ok := r.Fields[column]
 		if !ok || v == nil {
