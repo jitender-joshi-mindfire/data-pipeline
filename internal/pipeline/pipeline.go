@@ -191,12 +191,37 @@ func (p *Pipeline) Run(ctx context.Context) error {
 		}
 	}()
 
-	// Stage 2: Validator (reads from ingesterOut, writes to validatorOut)
+	// Count records as they leave the ingester and call SetTotal once ingestion
+	// finishes so the progress percentage is accurate from the start of validation.
+	countedOut := make(chan *model.Record, channelBufferSize)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		var total int64
+		for r := range ingesterOut {
+			total++
+			select {
+			case countedOut <- r:
+			case <-pipelineCtx.Done():
+				// drain remaining so ingester goroutine is not blocked
+				for range ingesterOut {
+				}
+				close(countedOut)
+				return
+			}
+		}
+		close(countedOut)
+		if p.Progress != nil {
+			p.Progress.SetTotal(p.Job.ID, total)
+		}
+	}()
+
+	// Stage 2: Validator (reads from countedOut, writes to validatorOut)
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
 		defer markDone(1)
-		if err := validatorPool.Run(pipelineCtx, ingesterOut, validatorOut); err != nil {
+		if err := validatorPool.Run(pipelineCtx, countedOut, validatorOut); err != nil {
 			if pipelineCtx.Err() == nil {
 				setFatal(fmt.Errorf("validator: %w", err))
 			}

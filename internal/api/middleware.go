@@ -2,7 +2,7 @@ package api
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"runtime/debug"
 	"sync"
@@ -33,7 +33,7 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(recorder, r)
 
 		duration := time.Since(start)
-		log.Printf("%s %s %d %s", r.Method, r.URL.Path, recorder.statusCode, duration)
+		slog.Info("request", "method", r.Method, "path", r.URL.Path, "status", recorder.statusCode, "duration", duration)
 	})
 }
 
@@ -134,7 +134,7 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 		defer func() {
 			if err := recover(); err != nil {
 				stack := debug.Stack()
-				log.Printf("PANIC: %v\n%s", err, stack)
+				slog.Error("panic recovered", "err", err, "stack", string(stack))
 				http.Error(w, fmt.Sprintf(`{"error":"internal server error"}`), http.StatusInternalServerError)
 			}
 		}()

@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -61,9 +61,10 @@ func main() {
 
 	// Start server in a goroutine
 	go func() {
-		log.Printf("Starting server on %s", port)
+		slog.Info("starting server", "addr", port)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Server failed: %v", err)
+			slog.Error("server failed", "err", err)
+			os.Exit(1)
 		}
 	}()
 
@@ -72,17 +73,18 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	log.Println("Shutting down server...")
+	slog.Info("shutting down server")
 
 	// Give outstanding requests 5 seconds to complete
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatalf("Server forced to shutdown: %v", err)
+		slog.Error("server forced to shutdown", "err", err)
+		os.Exit(1)
 	}
 
-	log.Println("Server stopped")
+	slog.Info("server stopped")
 }
 
 // pipelineRunner implements the api.PipelineRunner interface.
@@ -100,7 +102,7 @@ func (r *pipelineRunner) RunJob(jobID string) {
 	go func() {
 		job, err := r.jobStore.Get(jobID)
 		if err != nil {
-			log.Printf("Failed to get job %s for execution: %v", jobID, err)
+			slog.Error("failed to get job for execution", "job_id", jobID, "err", err)
 			return
 		}
 
@@ -147,9 +149,9 @@ func (r *pipelineRunner) RunJob(jobID string) {
 
 		// Run the pipeline
 		if err := p.Run(ctx); err != nil {
-			log.Printf("Pipeline job %s finished with error: %v", jobID, err)
+			slog.Error("pipeline job finished with error", "job_id", jobID, "err", err)
 		} else {
-			log.Printf("Pipeline job %s completed successfully", jobID)
+			slog.Info("pipeline job completed", "job_id", jobID)
 		}
 
 		// Clean up cancel function
@@ -194,7 +196,7 @@ func buildExportTargets(job *model.Job) ([]export.ExportTarget, []func()) {
 			}
 			target, err := export.NewSQLiteTarget(exp.Path, tableName)
 			if err != nil {
-				log.Printf("Failed to create SQLite target %s: %v", exp.Path, err)
+				slog.Error("failed to create SQLite target", "path", exp.Path, "err", err)
 				continue
 			}
 			target.SetSchema(exp.Schema)
@@ -215,12 +217,12 @@ func buildExportTargets(job *model.Job) ([]export.ExportTarget, []func()) {
 				dsn = os.Getenv("POSTGRES_DSN")
 			}
 			if dsn == "" {
-				log.Printf("Skipping postgres export target: no DSN provided (set path or POSTGRES_DSN)")
+				slog.Warn("skipping postgres export: no DSN provided (set path or POSTGRES_DSN env var)")
 				continue
 			}
 			target, err := export.NewPostgresTarget(dsn, tableName)
 			if err != nil {
-				log.Printf("Failed to create postgres target: %v", err)
+				slog.Error("failed to create postgres target", "err", err)
 				continue
 			}
 			target.SetSchema(exp.Schema)
